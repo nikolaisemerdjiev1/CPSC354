@@ -1,0 +1,141 @@
+\documentclass{article}
+
+\usepackage{tikz} 
+\usetikzlibrary{automata, positioning, arrows} 
+
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage{parskip}
+\usepackage{hyperref}
+  \hypersetup{
+    colorlinks = true,
+    urlcolor = blue,       % color of external links using \href
+    linkcolor= blue,       % color of internal links 
+    citecolor= blue,       % color of links to bibliography
+    filecolor= blue,        % color of file links
+    }
+    
+\usepackage{listings}
+\usepackage[utf8]{inputenc}                                                    
+\usepackage[T1]{fontenc}                                                       
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=haskell,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\newtheoremstyle{theorem}
+  {\topsep}   % ABOVESPACE
+  {\topsep}   % BELOWSPACE
+  {\itshape\/}  % BODYFONT
+  {0pt}       % INDENT (empty value is the same as 0pt)
+  {\bfseries} % HEADFONT
+  {.}         % HEADPUNCT
+  {5pt plus 1pt minus 1pt} % HEADSPACE
+  {}          % CUSTOM-HEAD-SPEC
+\theoremstyle{theorem} 
+   \newtheorem{theorem}{Theorem}[section]
+   \newtheorem{corollary}[theorem]{Corollary}
+   \newtheorem{lemma}[theorem]{Lemma}
+   \newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+   \newtheorem{definition}[theorem]{Definition}
+   \newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}    
+  \newtheorem{remark}[theorem]{Remark}
+
+\title{CPSC-354 Report}
+\author{Nikolai Semerdjiev  \\ Chapman University}
+
+\date{\today} 
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+
+\section{Introduction}\label{intro}
+
+\section{Week by Week}\label{homework}
+
+\subsection{Week 1}
+
+\begin{center}
+    \textbf{The MU Puzzle}
+\end{center}
+
+\textbf{RULES:}
+
+\begin{enumerate}
+  \item (Append-\texttt{U}) If a string ends with \texttt{I}, you may append \texttt{U}:\
+  \hspace{1em} $x\texttt{I} \to x\texttt{IU}$.
+  \item (Double) From \texttt{M}$x$ you may produce \texttt{M}$xx$:\
+  \hspace{1em} $\texttt{M}x \to \texttt{M}xx$.
+  \item (III$\to$U) Replace any occurrence of \texttt{III} with \texttt{U}:\
+  \hspace{1em} $x,\texttt{III},y \to x,\texttt{U},y$.
+  \item (Delete \texttt{UU}) Delete any occurrence of \texttt{UU}:\
+  \hspace{1em} $x,\texttt{UU},y \to x,y$.
+\end{enumerate}
+
+\textbf{Question:} Can you go from $\texttt{MI} \to \texttt{MU}$?
+
+\textbf{Solution:} No, it is impossible to derive \texttt{MU} from \texttt{MI}. At first, playing around with the rules, I noticed that the goal was to create the correct number of \texttt{I}'s where they would be converted to a single \texttt{U}, which means that we needed the rules to create $N_I \bmod 3 = 0$ as $N_I$ is \texttt{I} count.
+
+Now, consider how each rule affects $N_I$:
+\begin{itemize}
+  \item \textbf{(Append-\texttt{U})} This rule appends a \texttt{U} to the end of the 
+  string. It does not change the number of \texttt{I}'s, so $N_I$ is unchanged.
+  
+  \item \textbf{(Double)} The rule $\texttt{M}x \to \texttt{M}xx$ doubles the part 
+  after \texttt{M}. If the first string has $N_I$ \texttt{I}'s, then the new one has 
+  $2N_I$ \texttt{I}'s. In modular arithmetic, $N_I$ is multiplied by $2$ modulo $3$.
+  
+  \item \textbf{(III$\to$U)} This rule removes exactly three \texttt{I}'s. Therefore 
+  $N_I \mapsto N_I - 3$, which leaves $N_I \bmod 3$ unchanged.
+  
+  \item \textbf{(Delete \texttt{UU})} This rule affects only \texttt{U}'s, not 
+  \texttt{I}'s, so $N_I$ is unchanged.
+\end{itemize}
+
+Starting from $\texttt{MI}$, we have $N_I=1$, so $N_I \equiv 1 \pmod{3}$. 
+The only nontrivial change is doubling, which cycles $1 \mapsto 2 \mapsto 1 \mapsto 2 \dots$ 
+but never produces $0$. Thus, it is impossible to reach $N_I \equiv 0 \pmod{3}$.
+
+Since $\texttt{MU}$ has $N_I=0$, it is not derivable from $\texttt{MI}$.
+
+\section{Essay}
+
+\section{Evidence of Participation}
+
+\section{Conclusion}\label{conclusion}
+
+\begin{thebibliography}{99}
+\bibitem[BLA]{bla} Author, \href{https://en.wikipedia.org/wiki/LaTeX}{Title}, Publisher, Year.
+\end{thebibliography}
+
+\end{document}
