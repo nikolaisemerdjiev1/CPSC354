@@ -21,7 +21,9 @@
     
 \usepackage{listings}
 \usepackage[utf8]{inputenc}                                                    
-\usepackage[T1]{fontenc}                                                       
+\usepackage[T1]{fontenc}  
+\usepackage{quiver}
+
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -85,48 +87,290 @@
 
 \subsection{Week 1}
 
+\subsubsection{Notes and Exploration}
+
+In Week 1, we began with the MIU (or MU) puzzle from Hofstadter’s *Gödel, Escher, Bach*. 
+This puzzle introduces the idea of formal systems and rules of inference. 
+It is a good starting point to think about what it means to derive a string from an axiom 
+under a fixed set of rules.
+
 \begin{center}
     \textbf{The MU Puzzle}
 \end{center}
 
 \textbf{RULES:}
-
 \begin{enumerate}
-  \item (Append-\texttt{U}) If a string ends with \texttt{I}, you may append \texttt{U}:\
+  \item (Append-\texttt{U}) If a string ends with \texttt{I}, you may append \texttt{U}:\\
   \hspace{1em} $x\texttt{I} \to x\texttt{IU}$.
-  \item (Double) From \texttt{M}$x$ you may produce \texttt{M}$xx$:\
+  \item (Double) From \texttt{M}$x$ you may produce \texttt{M}$xx$:\\
   \hspace{1em} $\texttt{M}x \to \texttt{M}xx$.
-  \item (III$\to$U) Replace any occurrence of \texttt{III} with \texttt{U}:\
-  \hspace{1em} $x,\texttt{III},y \to x,\texttt{U},y$.
-  \item (Delete \texttt{UU}) Delete any occurrence of \texttt{UU}:\
-  \hspace{1em} $x,\texttt{UU},y \to x,y$.
+  \item (III$\to$U) Replace any occurrence of \texttt{III} with \texttt{U}:\\
+  \hspace{1em} $x\texttt{III}y \to x\texttt{U}y$.
+  \item (Delete \texttt{UU}) Delete any occurrence of \texttt{UU}:\\
+  \hspace{1em} $x\texttt{UU}y \to xy$.
 \end{enumerate}
 
-\textbf{Question:} Can you go from $\texttt{MI} \to \texttt{MU}$?
+\subsubsection{Homework}
 
-\textbf{Solution:} No, it is impossible to derive \texttt{MU} from \texttt{MI}. At first, playing around with the rules, I noticed that the goal was to create the correct number of \texttt{I}'s where they would be converted to a single \texttt{U}, which means that we needed the rules to create $N_I \bmod 3 = 0$ as $N_I$ is \texttt{I} count.
+\textbf{Problem:} Can you derive \texttt{MU} from \texttt{MI}?
+
+\textbf{Solution:} No, it is impossible to derive \texttt{MU} from \texttt{MI}. At first, 
+playing around with the rules, I noticed that the goal was to create the correct number 
+of \texttt{I}'s so that they could be converted to a single \texttt{U}. This means we 
+would need $N_I \bmod 3 = 0$, where $N_I$ counts the \texttt{I}'s.
 
 Now, consider how each rule affects $N_I$:
 \begin{itemize}
-  \item \textbf{(Append-\texttt{U})} This rule appends a \texttt{U} to the end of the 
-  string. It does not change the number of \texttt{I}'s, so $N_I$ is unchanged.
-  
-  \item \textbf{(Double)} The rule $\texttt{M}x \to \texttt{M}xx$ doubles the part 
-  after \texttt{M}. If the first string has $N_I$ \texttt{I}'s, then the new one has 
-  $2N_I$ \texttt{I}'s. In modular arithmetic, $N_I$ is multiplied by $2$ modulo $3$.
-  
-  \item \textbf{(III$\to$U)} This rule removes exactly three \texttt{I}'s. Therefore 
-  $N_I \mapsto N_I - 3$, which leaves $N_I \bmod 3$ unchanged.
-  
-  \item \textbf{(Delete \texttt{UU})} This rule affects only \texttt{U}'s, not 
-  \texttt{I}'s, so $N_I$ is unchanged.
+  \item \textbf{(Append-\texttt{U})} Appends a \texttt{U}, leaves $N_I$ unchanged.
+  \item \textbf{(Double)} $\texttt{M}x \to \texttt{M}xx$ doubles $N_I$; in modular arithmetic, $N_I \mapsto 2N_I \pmod{3}$.
+  \item \textbf{(III$\to$U)} Removes three \texttt{I}'s, leaving $N_I \bmod 3$ unchanged.
+  \item \textbf{(Delete \texttt{UU})} Only touches \texttt{U}'s, leaves $N_I$ unchanged.
 \end{itemize}
 
-Starting from $\texttt{MI}$, we have $N_I=1$, so $N_I \equiv 1 \pmod{3}$. 
-The only nontrivial change is doubling, which cycles $1 \mapsto 2 \mapsto 1 \mapsto 2 \dots$ 
-but never produces $0$. Thus, it is impossible to reach $N_I \equiv 0 \pmod{3}$.
+Starting from $\texttt{MI}$, we have $N_I = 1 \equiv 1 \pmod{3}$. Doubling cycles 
+between $1$ and $2$ modulo $3$, never producing $0$. Thus, it is impossible to reach 
+$N_I \equiv 0 \pmod{3}$.
 
-Since $\texttt{MU}$ has $N_I=0$, it is not derivable from $\texttt{MI}$.
+Since $\texttt{MU}$ has $N_I=0$, it cannot be derived from $\texttt{MI}$.
+
+\subsubsection{Questions}
+
+What is the reasoning behind being able to convert $\texttt{MIII}$ into $\texttt{MU}$ 
+(using the rule $\texttt{III}\to \texttt{U}$) but not being able to go the other way 
+(from $\texttt{MU}$ to $\texttt{MIII}$)?
+
+\subsection{Week 2}
+
+\subsubsection{Homework}
+
+\textbf{Problem:} Consider the following ARSs. Draw a picture for each one. 
+Are the ARSs terminating? Are they confluent? Do they have unique normal forms?
+
+\begin{enumerate}
+  \item $A = \{\}, \quad R = \{\}$
+  \item $A = \{a\}, \quad R = \{\}$
+  \item $A = \{a\}, \quad R = \{(a,a)\}$
+  \item $A = \{a,b,c\}, \quad R = \{(a,b),(a,c)\}$
+  \item $A = \{a,b\}, \quad R = \{(a,a),(a,b)\}$
+  \item $A = \{a,b,c\}, \quad R = \{(a,b),(b,b),(a,c)\}$
+  \item $A = \{a,b,c\}, \quad R = \{(a,b),(b,b),(a,c),(c,c)\}$
+\end{enumerate}
+
+\textbf{Solution:}  
+For each ARS, I drew a graph (see figures) and analyzed:
+
+- **Termination:** whether there are infinite chains.  
+- **Confluence:** whether every divergence can rejoin.  
+- **Unique normal forms:** whether each element has a unique NF.
+
+I will include one diagram for each ARS along with a short explanation of my analysis.
+
+\paragraph{ARS 1: $A = \{\}, \; R = \{\}$}
+
+There is no infinite chain, no diverging paths exist as there is no path at all, and 
+nothing exists to violate uniqueness. Therefore $\checkmark$ terminating, $\checkmark$ confluent, 
+and $\checkmark$ has unique normal form.
+
+\paragraph{ARS 2: $A = \{a\}, \; R = \{\}$}
+
+% https://q.uiver.app/#q=WzAsMSxbMCwwLCJcXGJ1bGxldCJdXQ==
+\[\begin{tikzcd}
+	\bullet
+\end{tikzcd}\]
+
+No rewrite steps: no infinite chain, no diverging paths exist or no path at all so it is vacuously satisfied and $a$ is the only reachable normal form from $a$. Therefore $\checkmark$ terminating, $\checkmark$ confluent, and $\checkmark$ has unique normal form.
+
+\paragraph{ARS 3: $A=\{a\},\; R=\{(a,a)\}$}
+
+% https://q.uiver.app/#q=WzAsMSxbMCwwLCJcXGJ1bGxldCJdLFswLDBdXQ==
+\[\begin{tikzcd}
+	\bullet
+	\arrow[from=1-1, to=1-1, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}\]
+
+There is an infinite chain, $a \to^* a$. Since $a \to^* y$ and $a \to^* z$, therefore $y = z = a$, joining at $a$, and there are no normal forms as there is only one term, $a$, which has infinite outgoing rewrite steps. Therefore $\times$ terminating, $\checkmark$ confluent, and $\times$ unique normal form.
+
+\paragraph{ARS 4: $A=\{a,b,c\},\; R=\{(a,b),(a,c)\}$}
+
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwxXSxbMCwyXV0=
+\[
+\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+\end{tikzcd}
+\]
+
+There is no infinite chain, two diverging paths that do not get joined, and two different normal forms from $a$. Therefore $\checkmark$ terminating, $\times$ confluent, and $\times$ unique normal form.
+
+\paragraph{ARS 5: $A=\{a,b\},\; R=\{(a,a),(a,b)\}$}
+
+% https://q.uiver.app/#q=WzAsMixbMCwwLCJcXGJ1bGxldCJdLFsxLDAsIlxcYnVsbGV0Il0sWzAsMF0sWzAsMV1d
+\[
+\begin{tikzcd}
+	\bullet & \bullet
+	\arrow[from=1-1, to=1-1, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-1, to=1-2]
+\end{tikzcd}
+\]
+
+Even with one infinite chain it does not terminate, $a\to a$ and $a\to b$ and they join at $b$, $b$ is the only normal form since $a$ has an infinite chain therefore $\times$ terminating, $\checkmark$ confluent, has a $\checkmark$ unique normal form.
+
+
+\paragraph{ARS 6: $A=\{a,b,c\},\; R=\{(a,b),(b,b),(a,c)\}$}
+
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwxXSxbMSwxXSxbMCwyXV0=
+\[
+\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=2-1, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}
+\]
+
+Infinite chain at $b$ (since $b \to b \to b \cdots$). From $a$ the system diverges to $b$ and $c$ with no connecting path to join them. The only normal form is $c$, but not every element reduces to a unique normal form, so the system is $\times$ terminating, $\times$ confluent, and $\times$ has unique normal form.
+
+\paragraph{ARS 7: $A=\{a,b,c\},\; R=\{(a,b),(a,c),(b,b),(c,c)\}$}
+
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwxXSxbMCwyXSxbMSwxXSxbMiwyXV0=
+\[
+\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=2-1, loop, in=55, out=125, distance=10mm]
+	\arrow[from=2-3, to=2-3, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}
+\]
+
+There are two infinite chains ($b \to b \to \cdots$ and $c \to c \to \cdots$). 
+From $a$ the system diverges to $b$ and $c$, but since $b$ only reaches $b$ and $c$ only reaches $c$, 
+the peak at $a$ does not join. Every element has outgoing rewrite steps, so there are no normal forms. 
+Therefore $\times$ terminating, $\times$ confluent, and $\times$ has unique normal form.
+
+\textbf{All Eight Combinations}
+
+The homework also asked to find examples of ARSs for each of the eight possible
+combinations of confluence, termination, and unique normal forms. 
+The table below summarizes the results.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Confluent} & \textbf{Terminating} & \textbf{Unique Normal Forms} & \textbf{Example $(A,R)$} \\
+\hline
+True  & True  & True  & $A = \{a,b,c,d\},\; R = \{(a,b),(a,c),(b,d),(c,d)\}$ \\
+\hline
+True  & True  & False & N/A \\
+\hline
+True  & False & True  & $A = \{a,b,c,d\},\; R = \{(a,a),(a,b),(a,c),(b,d),(c,d)\}$ \\
+\hline
+True  & False & False & $A = \{a,b,c,d\},\; R = \{(a,b),(a,c),(b,d),(c,d),(d,d)\}$ \\
+\hline
+False & True  & True  & N/A \\
+\hline
+False & True  & False & $A = \{a,b,c,d\},\; R = \{(a,b),(a,c),(b,d)\}$ \\
+\hline
+False & False & True  & $A = \{a,b,c\},\; R = \{(a,b),(a,c),(b,d),(c,d),(d,d)\}$ \\
+\hline
+False & False & False & $A = \{a,b,c\},\; R = \{(a,a),(a,b),(a,c)\}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Example Graphs}
+
+\paragraph{Graph 1}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzEsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDFdLFswLDNdLFsxLDJdLFszLDJdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	& \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-2]
+	\arrow[from=2-3, to=3-2]
+\end{tikzcd}\]
+
+\paragraph{Graph 2}
+This comination is impossible as termination gives a normal form for each element AND confluence guarantees any two reduction paths from the same element to join therefore all reductions end at some normal form.
+
+\paragraph{Graph 3}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzEsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDBdLFswLDFdLFsxLDJdLFswLDNdLFszLDJdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	& \bullet
+	\arrow[from=1-2, to=1-2, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-2]
+	\arrow[from=2-3, to=3-2]
+\end{tikzcd}\]
+
+\paragraph{Graph 4}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzEsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDNdLFswLDFdLFsxLDJdLFszLDJdLFsyLDJdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	& \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-2]
+	\arrow[from=2-3, to=3-2]
+	\arrow[from=3-2, to=3-2, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}\]
+
+\paragraph{Graph 5}
+
+This case is impossible. Every system that is terminating and where every element has a unique normal form must also be confluent. 
+Indeed, if $a \to^* y$ and $a \to^* z$, then both $y$ and $z$ reduce to some normal forms. 
+Since the normal form is unique, $y$ and $z$ must reduce to the same normal form, 
+which means the system is confluent.
+
+
+\paragraph{Graph 6}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzAsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDFdLFsxLDJdLFswLDNdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	\bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-1]
+\end{tikzcd}\]
+
+\paragraph{Graph 7}
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwwXSxbMCwxXSxbMCwyXSxbMiwyXV0=
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=1-2, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-3, to=2-3, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}\]
+
+\paragraph{Graph 8}
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFsyLDEsIlxcYnVsbGV0Il0sWzAsMSwiXFxidWxsZXQiXSxbMCwwXSxbMCwyXSxbMCwxXV0=
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=1-2, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+\end{tikzcd}\]
+
+
+
+\subsubsection{Questions}
+
+How can thinking about ARSs help us better understand the way programming languages define and control the process of evaluating programs?
+
 
 \section{Essay}
 
