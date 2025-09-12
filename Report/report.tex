@@ -371,6 +371,83 @@ which means the system is confluent.
 
 How can thinking about ARSs help us better understand the way programming languages define and control the process of evaluating programs?
 
+\subsection{Week 3}
+
+\subsubsection{Homework}
+
+\textbf{Exercise 5:} Consider the rewrite rules
+\[
+ab \to ba, \quad ba \to ab, \quad aa \to \varepsilon, \quad b \to \varepsilon
+\]
+
+Reduce some example strings such as \texttt{abba} and \texttt{bababa}.  
+\textbf{Answer:} 
+\[
+\texttt{abba} \;\to\; \texttt{abab} \;\to\; \texttt{aba} \;\to\; \texttt{aa} \;\to\; \varepsilon.
+\]
+\[
+\texttt{bababa} \;\to\; \texttt{bbaaba} \;\to\; \texttt{bbba} \;\to\; \texttt{bba} \;\to\; \texttt{ba} \;\to\; \texttt{a}.
+\]
+\emph{No rule applies to a single \texttt{a}; this is the farthest you can go.}\\[1em]
+
+Why is the ARS not terminating?  
+\textbf{Answer:} There is always a way to terminate if you use the deletion rules (3) and (4), but using only the swap rules (1) and (2) yields an infinite loop (e.g., \(\texttt{ab} \leftrightarrow \texttt{ba} \leftrightarrow \texttt{ab} \leftrightarrow \cdots\)), so the ARS is \emph{not terminating} overall.\\[1em]
+
+Find two strings that are not equivalent. How many non-equivalent strings can you find?  
+\textbf{Answer:} Two strings not equivalent: \(\texttt{baba} \not\!\leftrightarrow^{*} \texttt{ababa}\). There are infinitely many non-equivalent pairs: strings split by the parity of the number of \(a\)'s (even vs.\ odd), so you can keep making pairs with different \(a\)-parity.\\[1em]
+
+How many equivalence classes does \(\leftrightarrow^{*}\) have? Can you describe them in a nice way? What are the normal forms?  
+\textbf{Answer:} There are \(2\) equivalence classes under \(\leftrightarrow^{*}\):
+(1) strings with an \emph{even} number of \(a\)'s, which reduce to the normal form \(\varepsilon\);
+(2) strings with an \emph{odd} number of \(a\)'s, which reduce to the normal form \(a\).
+Set of normal forms: \(\{\varepsilon, a\}\).\\[1em]
+
+Can you modify the ARS so that it becomes terminating without changing its equivalence classes?  
+\textbf{Answer:} Yes. Drop \(ab \to ba\) and keep \(ba \to ab\), together with \(aa \to \varepsilon\) and \(b \to \varepsilon\).
+This orientation is terminating while preserving the same equivalence classes and normal forms (still \(\{\varepsilon, a\}\)).\\[1em]
+
+Write down a question or two about strings that can be answered using the ARS. Think about whether this amounts to giving a semantics to the ARS.  
+\textbf{Answer:} Given any string \(x \in \{a,b\}^{*}\), does \(x\) reduce to \(\varepsilon\) or to \(a\)?
+Equivalently: is the number of \(a\)'s in \(x\) even or odd? This gives a semantics mapping each string to \(\varepsilon\) (even) or \(a\) (odd).\\[1em]
+
+\textbf{Exercise 5b:} Consider the rewrite rules
+\[
+ab \to ba, \quad ba \to ab, \quad aa \to a, \quad b \to \varepsilon
+\]
+
+Reduce some example strings such as \texttt{abba} and \texttt{bababa}.  
+\textbf{Answer:}
+\[
+\texttt{abba} \;\to\; \texttt{aba} \;\to\; \texttt{aa} \;\to\; a.
+\]
+\[
+\texttt{bababa} \;\to\; \texttt{ababa} \;\to\; \texttt{aaba} \;\to\; \texttt{aaa} \;\to\; \texttt{aa} \;\to\; a.
+\]
+\emph{No rule applies to a single \texttt{a}; this is the farthest you can go.}\\[1em]
+
+Why is the ARS not terminating?  
+\textbf{Answer:} This example still has an infinite chain if you don’t use rules (3) or (4): the swaps \(ab \leftrightarrow ba\) can loop forever.\\[1em]
+
+Find two strings that are not equivalent. How many non-equivalent strings can you find?  
+\textbf{Answer:} Two non-equivalent strings: \(\texttt{bbb} \not\!\leftrightarrow^{*} \texttt{babab}\). There are infinitely many non-equivalent pairs.\\[1em]
+
+How many equivalence classes does \(\leftrightarrow^{*}\) have? Can you describe them in a nice way? What are the normal forms?  
+\textbf{Answer:} There are \(2\) equivalence classes for \(\leftrightarrow^{*}\).  
+If a string has \emph{no} \(a\)’s, its normal form is \(\varepsilon\).  
+If a string has \emph{at least one} \(a\), its normal form is \(a\).  
+Set of normal forms: \(\{\varepsilon, a\}\).\\[1em]
+
+Can you modify the ARS so that it becomes terminating without changing its equivalence classes?  
+\textbf{Answer:} Drop \(ab \to ba\) and keep \(ba \to ab\), along with \(aa \to a\) and \(b \to \varepsilon\).  
+This orientation terminates while preserving the same equivalence classes and normal forms.\\[1em]
+
+Write down a question or two about strings that can be answered using the ARS. Think about whether this amounts to giving a semantics to the ARS.  
+\textbf{Answer:} Given any string \(x \in \{a,b\}^{*}\), does \(x\) contain at least one \(a\)?  
+Equivalently: does \(x\) reduce to \(a\) (some \(a\) present) or to \(\varepsilon\) (no \(a\)’s)?\\[1em]
+
+\subsubsection{Questions}
+
+How does changing the rewrite rule from $aa \to \varepsilon$ to $aa \to a$ resemble differences in evaluation strategies when creating a programming language?
 
 \section{Essay}
 
