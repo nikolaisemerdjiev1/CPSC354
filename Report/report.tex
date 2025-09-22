@@ -449,6 +449,109 @@ Equivalently: does \(x\) reduce to \(a\) (some \(a\) present) or to \(\varepsilo
 
 How does changing the rewrite rule from $aa \to \varepsilon$ to $aa \to a$ resemble differences in evaluation strategies when creating a programming language?
 
+\subsection{Week 4}
+
+\subsubsection{Homework}
+
+\begin{verbatim}
+while b != 0:
+    temp = b
+    b = a % b
+    a = temp
+return a
+\end{verbatim}
+
+The algorithm always terminates provided that.
+\begin{enumerate}
+    \item The inputs satisfy $a \geq 0$ and $b \geq 0$.
+    \item If $b = 0$ initially, the loop terminates immediately.
+    \item For $b > 0$, the remainder operation is defined by the division algorithm: 
+    \[
+    a = qb + r, \quad 0 \leq r < b,
+    \]
+    where $r = a \bmod b$.
+\end{enumerate}
+
+Define the measure function
+\[
+\phi(a,b) = b.
+\]
+
+Consider one loop iteration:
+\[
+(a,b) \mapsto (b,\, a \bmod b).
+\]
+By the division algorithm, 
+\[
+0 \leq a \bmod b < b.
+\]
+Therefore,
+\[
+\phi(a,b) = b > a \bmod b = \phi(b, a \bmod b).
+\]
+Hence $\phi$ strictly decreases with each iteration.
+
+Since $\phi(a,b)$ is a nonnegative integer, it cannot decrease infinitely. After finitely many steps, we must reach $b = 0$, at which point the loop terminates.
+
+\begin{verbatim}
+function merge_sort(arr, left, right):
+    if left >= right:
+        return
+    mid = floor((left + right) / 2)
+    merge_sort(arr, left, mid)
+    merge_sort(arr, mid+1, right)
+    merge(arr, left, mid, right)
+\end{verbatim}
+
+The function
+\[
+\phi(\text{left},\text{right}) \;=\; \text{right} - \text{left} + 1
+\]
+is a measure function for \texttt{merge\_sort} (with integer indices and
+\(\texttt{mid}=\lfloor ( \text{left}+\text{right})/2 \rfloor\)).
+
+Assume \(\text{left},\text{right}\in\mathbb{Z}\) and the procedure is only called with
+\(\text{left}\le \text{right}\). The branching factor is finite (at most two recursive calls).
+
+Let \(n=\phi(\text{left},\text{right})=\text{right}-\text{left}+1\).
+
+\begin{itemize}
+  \item \emph{Base case.} If \(\text{left}\ge \text{right}\) then \(n\le 1\) and the function returns without making recursive calls. No decrease condition needs to be checked.
+
+  \item \emph{Recursive case.} Suppose \(\text{left}<\text{right}\), hence \(n\ge 2\).
+  Set \(\texttt{mid}=\left\lfloor \dfrac{\text{left}+\text{right}}{2}\right\rfloor\).
+  Then \(\text{left}\le \texttt{mid}<\text{right}\), so both subproblems are well-formed:
+  \[
+  (\text{left},\texttt{mid}) \quad\text{and}\quad (\texttt{mid}+1,\text{right}).
+  \]
+  Their measures are
+  \[
+  \phi(\text{left},\texttt{mid})=\texttt{mid}-\text{left}+1
+  \quad\text{and}\quad
+  \phi(\texttt{mid}+1,\text{right})=\text{right}-\texttt{mid}.
+  \]
+  Using \(\texttt{mid}=\left\lfloor \dfrac{\text{left}+\text{right}}{2}\right\rfloor\) and \(n=\text{right}-\text{left}+1\), we get the bounds
+  \[
+  \phi(\text{left},\texttt{mid}) \;\le\; \left\lceil \frac{n}{2} \right\rceil
+  \quad\text{and}\quad
+  \phi(\texttt{mid}+1,\text{right}) \;\le\; \left\lfloor \frac{n}{2} \right\rfloor.
+  \]
+  Since \(n\ge 2\), both \(\left\lceil \dfrac{n}{2}\right\rceil<n\) and \(\left\lfloor \dfrac{n}{2}\right\rfloor<n\) hold. Therefore
+  \[
+  \phi(\text{left},\texttt{mid}) \;<\; \phi(\text{left},\text{right})
+  \qquad\text{and}\qquad
+  \phi(\texttt{mid}+1,\text{right}) \;<\; \phi(\text{left},\text{right}).
+  \]
+  Hence the measure strictly decreases along every recursive edge.
+\end{itemize}
+
+Because \(\phi\) maps states to \(\mathbb{N}\) and strictly decreases with each recursive call,
+no infinite descent is possible. Together with finite branching, this implies termination.
+
+\subsection{Questions}
+
+How do different evaluation strategies in programming languages (such as call-by-value vs.\ call-by-name) influence whether a program is guaranteed to terminate, and in what ways can techniques like measure functions help us reason about termination across these strategies?
+
 \section{Essay}
 
 \section{Evidence of Participation}
