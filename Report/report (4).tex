@@ -1,0 +1,788 @@
+\documentclass{article}
+\documentclass[11pt]{article}
+
+\usepackage{tikz} 
+\usetikzlibrary{automata, positioning, arrows} 
+
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage{parskip}
+\usepackage{hyperref}
+  \hypersetup{
+    colorlinks = true,
+    urlcolor = blue,       % color of external links using \href
+    linkcolor= blue,       % color of internal links 
+    citecolor= blue,       % color of links to bibliography
+    filecolor= blue,        % color of file links
+    }
+    
+\usepackage{listings}
+\usepackage[utf8]{inputenc}                                                    
+\usepackage[T1]{fontenc}  
+\usepackage{quiver}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=haskell,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\newtheoremstyle{theorem}
+  {\topsep}   % ABOVESPACE
+  {\topsep}   % BELOWSPACE
+  {\itshape\/}  % BODYFONT
+  {0pt}       % INDENT (empty value is the same as 0pt)
+  {\bfseries} % HEADFONT
+  {.}         % HEADPUNCT
+  {5pt plus 1pt minus 1pt} % HEADSPACE
+  {}          % CUSTOM-HEAD-SPEC
+\theoremstyle{theorem} 
+   \newtheorem{theorem}{Theorem}[section]
+   \newtheorem{corollary}[theorem]{Corollary}
+   \newtheorem{lemma}[theorem]{Lemma}
+   \newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+   \newtheorem{definition}[theorem]{Definition}
+   \newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}    
+  \newtheorem{remark}[theorem]{Remark}
+
+\title{CPSC-354 Report}
+\author{Nikolai Semerdjiev  \\ Chapman University}
+
+\date{\today} 
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+
+\section{Introduction}\label{intro}
+
+\section{Week by Week}\label{homework}
+
+\subsection{Week 1}
+
+\subsubsection{Notes and Exploration}
+
+In Week 1, we began with the MIU (or MU) puzzle from Hofstadter’s *Gödel, Escher, Bach*. 
+This puzzle introduces the idea of formal systems and rules of inference. 
+It is a good starting point to think about what it means to derive a string from an axiom 
+under a fixed set of rules.
+
+\begin{center}
+    \textbf{The MU Puzzle}
+\end{center}
+
+\textbf{RULES:}
+\begin{enumerate}
+  \item (Append-\texttt{U}) If a string ends with \texttt{I}, you may append \texttt{U}:\\
+  \hspace{1em} $x\texttt{I} \to x\texttt{IU}$.
+  \item (Double) From \texttt{M}$x$ you may produce \texttt{M}$xx$:\\
+  \hspace{1em} $\texttt{M}x \to \texttt{M}xx$.
+  \item (III$\to$U) Replace any occurrence of \texttt{III} with \texttt{U}:\\
+  \hspace{1em} $x\texttt{III}y \to x\texttt{U}y$.
+  \item (Delete \texttt{UU}) Delete any occurrence of \texttt{UU}:\\
+  \hspace{1em} $x\texttt{UU}y \to xy$.
+\end{enumerate}
+
+\subsubsection{Homework}
+
+\textbf{Problem:} Can you derive \texttt{MU} from \texttt{MI}?
+
+\textbf{Solution:} No, it is impossible to derive \texttt{MU} from \texttt{MI}. At first, 
+playing around with the rules, I noticed that the goal was to create the correct number 
+of \texttt{I}'s so that they could be converted to a single \texttt{U}. This means we 
+would need $N_I \bmod 3 = 0$, where $N_I$ counts the \texttt{I}'s.
+
+Now, consider how each rule affects $N_I$:
+\begin{itemize}
+  \item \textbf{(Append-\texttt{U})} Appends a \texttt{U}, leaves $N_I$ unchanged.
+  \item \textbf{(Double)} $\texttt{M}x \to \texttt{M}xx$ doubles $N_I$; in modular arithmetic, $N_I \mapsto 2N_I \pmod{3}$.
+  \item \textbf{(III$\to$U)} Removes three \texttt{I}'s, leaving $N_I \bmod 3$ unchanged.
+  \item \textbf{(Delete \texttt{UU})} Only touches \texttt{U}'s, leaves $N_I$ unchanged.
+\end{itemize}
+
+Starting from $\texttt{MI}$, we have $N_I = 1 \equiv 1 \pmod{3}$. Doubling cycles 
+between $1$ and $2$ modulo $3$, never producing $0$. Thus, it is impossible to reach 
+$N_I \equiv 0 \pmod{3}$.
+
+Since $\texttt{MU}$ has $N_I=0$, it cannot be derived from $\texttt{MI}$.
+
+\subsubsection{Questions}
+
+What is the reasoning behind being able to convert $\texttt{MIII}$ into $\texttt{MU}$ 
+(using the rule $\texttt{III}\to \texttt{U}$) but not being able to go the other way 
+(from $\texttt{MU}$ to $\texttt{MIII}$)?
+
+\subsection{Week 2}
+
+\subsubsection{Homework}
+
+\textbf{Problem:} Consider the following ARSs. Draw a picture for each one. 
+Are the ARSs terminating? Are they confluent? Do they have unique normal forms?
+
+\begin{enumerate}
+  \item $A = \{\}, \quad R = \{\}$
+  \item $A = \{a\}, \quad R = \{\}$
+  \item $A = \{a\}, \quad R = \{(a,a)\}$
+  \item $A = \{a,b,c\}, \quad R = \{(a,b),(a,c)\}$
+  \item $A = \{a,b\}, \quad R = \{(a,a),(a,b)\}$
+  \item $A = \{a,b,c\}, \quad R = \{(a,b),(b,b),(a,c)\}$
+  \item $A = \{a,b,c\}, \quad R = \{(a,b),(b,b),(a,c),(c,c)\}$
+\end{enumerate}
+
+\textbf{Solution:}  
+For each ARS, I drew a graph (see figures) and analyzed:
+
+- **Termination:** whether there are infinite chains.  
+- **Confluence:** whether every divergence can rejoin.  
+- **Unique normal forms:** whether each element has a unique NF.
+
+I will include one diagram for each ARS along with a short explanation of my analysis.
+
+\paragraph{ARS 1: $A = \{\}, \; R = \{\}$}
+
+There is no infinite chain, no diverging paths exist as there is no path at all, and 
+nothing exists to violate uniqueness. Therefore $\checkmark$ terminating, $\checkmark$ confluent, 
+and $\checkmark$ has unique normal form.
+
+\paragraph{ARS 2: $A = \{a\}, \; R = \{\}$}
+
+% https://q.uiver.app/#q=WzAsMSxbMCwwLCJcXGJ1bGxldCJdXQ==
+\[\begin{tikzcd}
+	\bullet
+\end{tikzcd}\]
+
+No rewrite steps: no infinite chain, no diverging paths exist or no path at all so it is vacuously satisfied and $a$ is the only reachable normal form from $a$. Therefore $\checkmark$ terminating, $\checkmark$ confluent, and $\checkmark$ has unique normal form.
+
+\paragraph{ARS 3: $A=\{a\},\; R=\{(a,a)\}$}
+
+% https://q.uiver.app/#q=WzAsMSxbMCwwLCJcXGJ1bGxldCJdLFswLDBdXQ==
+\[\begin{tikzcd}
+	\bullet
+	\arrow[from=1-1, to=1-1, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}\]
+
+There is an infinite chain, $a \to^* a$. Since $a \to^* y$ and $a \to^* z$, therefore $y = z = a$, joining at $a$, and there are no normal forms as there is only one term, $a$, which has infinite outgoing rewrite steps. Therefore $\times$ terminating, $\checkmark$ confluent, and $\times$ unique normal form.
+
+\paragraph{ARS 4: $A=\{a,b,c\},\; R=\{(a,b),(a,c)\}$}
+
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwxXSxbMCwyXV0=
+\[
+\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+\end{tikzcd}
+\]
+
+There is no infinite chain, two diverging paths that do not get joined, and two different normal forms from $a$. Therefore $\checkmark$ terminating, $\times$ confluent, and $\times$ unique normal form.
+
+\paragraph{ARS 5: $A=\{a,b\},\; R=\{(a,a),(a,b)\}$}
+
+% https://q.uiver.app/#q=WzAsMixbMCwwLCJcXGJ1bGxldCJdLFsxLDAsIlxcYnVsbGV0Il0sWzAsMF0sWzAsMV1d
+\[
+\begin{tikzcd}
+	\bullet & \bullet
+	\arrow[from=1-1, to=1-1, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-1, to=1-2]
+\end{tikzcd}
+\]
+
+Even with one infinite chain it does not terminate, $a\to a$ and $a\to b$ and they join at $b$, $b$ is the only normal form since $a$ has an infinite chain therefore $\times$ terminating, $\checkmark$ confluent, has a $\checkmark$ unique normal form.
+
+
+\paragraph{ARS 6: $A=\{a,b,c\},\; R=\{(a,b),(b,b),(a,c)\}$}
+
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwxXSxbMSwxXSxbMCwyXV0=
+\[
+\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=2-1, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}
+\]
+
+Infinite chain at $b$ (since $b \to b \to b \cdots$). From $a$ the system diverges to $b$ and $c$ with no connecting path to join them. The only normal form is $c$, but not every element reduces to a unique normal form, so the system is $\times$ terminating, $\times$ confluent, and $\times$ has unique normal form.
+
+\paragraph{ARS 7: $A=\{a,b,c\},\; R=\{(a,b),(a,c),(b,b),(c,c)\}$}
+
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwxXSxbMCwyXSxbMSwxXSxbMiwyXV0=
+\[
+\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=2-1, loop, in=55, out=125, distance=10mm]
+	\arrow[from=2-3, to=2-3, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}
+\]
+
+There are two infinite chains ($b \to b \to \cdots$ and $c \to c \to \cdots$). 
+From $a$ the system diverges to $b$ and $c$, but since $b$ only reaches $b$ and $c$ only reaches $c$, 
+the peak at $a$ does not join. Every element has outgoing rewrite steps, so there are no normal forms. 
+Therefore $\times$ terminating, $\times$ confluent, and $\times$ has unique normal form.
+
+\textbf{All Eight Combinations}
+
+The homework also asked to find examples of ARSs for each of the eight possible
+combinations of confluence, termination, and unique normal forms. 
+The table below summarizes the results.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Confluent} & \textbf{Terminating} & \textbf{Unique Normal Forms} & \textbf{Example $(A,R)$} \\
+\hline
+True  & True  & True  & $A = \{a,b,c,d\},\; R = \{(a,b),(a,c),(b,d),(c,d)\}$ \\
+\hline
+True  & True  & False & N/A \\
+\hline
+True  & False & True  & $A = \{a,b,c,d\},\; R = \{(a,a),(a,b),(a,c),(b,d),(c,d)\}$ \\
+\hline
+True  & False & False & $A = \{a,b,c,d\},\; R = \{(a,b),(a,c),(b,d),(c,d),(d,d)\}$ \\
+\hline
+False & True  & True  & N/A \\
+\hline
+False & True  & False & $A = \{a,b,c,d\},\; R = \{(a,b),(a,c),(b,d)\}$ \\
+\hline
+False & False & True  & $A = \{a,b,c\},\; R = \{(a,b),(a,c),(b,d),(c,d),(d,d)\}$ \\
+\hline
+False & False & False & $A = \{a,b,c\},\; R = \{(a,a),(a,b),(a,c)\}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Example Graphs}
+
+\paragraph{Graph 1}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzEsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDFdLFswLDNdLFsxLDJdLFszLDJdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	& \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-2]
+	\arrow[from=2-3, to=3-2]
+\end{tikzcd}\]
+
+\paragraph{Graph 2}
+This comination is impossible as termination gives a normal form for each element AND confluence guarantees any two reduction paths from the same element to join therefore all reductions end at some normal form.
+
+\paragraph{Graph 3}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzEsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDBdLFswLDFdLFsxLDJdLFswLDNdLFszLDJdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	& \bullet
+	\arrow[from=1-2, to=1-2, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-2]
+	\arrow[from=2-3, to=3-2]
+\end{tikzcd}\]
+
+\paragraph{Graph 4}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzEsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDNdLFswLDFdLFsxLDJdLFszLDJdLFsyLDJdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	& \bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-2]
+	\arrow[from=2-3, to=3-2]
+	\arrow[from=3-2, to=3-2, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}\]
+
+\paragraph{Graph 5}
+
+This case is impossible. Every system that is terminating and where every element has a unique normal form must also be confluent. 
+Indeed, if $a \to^* y$ and $a \to^* z$, then both $y$ and $z$ reduce to some normal forms. 
+Since the normal form is unique, $y$ and $z$ must reduce to the same normal form, 
+which means the system is confluent.
+
+
+\paragraph{Graph 6}
+% https://q.uiver.app/#q=WzAsNCxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzAsMiwiXFxidWxsZXQiXSxbMiwxLCJcXGJ1bGxldCJdLFswLDFdLFsxLDJdLFswLDNdXQ==
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet \\
+	\bullet
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-1, to=3-1]
+\end{tikzcd}\]
+
+\paragraph{Graph 7}
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFswLDEsIlxcYnVsbGV0Il0sWzIsMSwiXFxidWxsZXQiXSxbMCwwXSxbMCwxXSxbMCwyXSxbMiwyXV0=
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=1-2, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+	\arrow[from=2-3, to=2-3, loop, in=55, out=125, distance=10mm]
+\end{tikzcd}\]
+
+\paragraph{Graph 8}
+% https://q.uiver.app/#q=WzAsMyxbMSwwLCJcXGJ1bGxldCJdLFsyLDEsIlxcYnVsbGV0Il0sWzAsMSwiXFxidWxsZXQiXSxbMCwwXSxbMCwyXSxbMCwxXV0=
+\[\begin{tikzcd}
+	& \bullet \\
+	\bullet && \bullet
+	\arrow[from=1-2, to=1-2, loop, in=55, out=125, distance=10mm]
+	\arrow[from=1-2, to=2-1]
+	\arrow[from=1-2, to=2-3]
+\end{tikzcd}\]
+
+
+
+\subsubsection{Questions}
+
+How can thinking about ARSs help us better understand the way programming languages define and control the process of evaluating programs?
+
+\subsection{Week 3}
+
+\subsubsection{Homework}
+
+\textbf{Exercise 5:} Consider the rewrite rules
+\[
+ab \to ba, \quad ba \to ab, \quad aa \to \varepsilon, \quad b \to \varepsilon
+\]
+
+Reduce some example strings such as \texttt{abba} and \texttt{bababa}.  
+\textbf{Answer:} 
+\[
+\texttt{abba} \;\to\; \texttt{abab} \;\to\; \texttt{aba} \;\to\; \texttt{aa} \;\to\; \varepsilon.
+\]
+\[
+\texttt{bababa} \;\to\; \texttt{bbaaba} \;\to\; \texttt{bbba} \;\to\; \texttt{bba} \;\to\; \texttt{ba} \;\to\; \texttt{a}.
+\]
+\emph{No rule applies to a single \texttt{a}; this is the farthest you can go.}\\[1em]
+
+Why is the ARS not terminating?  
+\textbf{Answer:} There is always a way to terminate if you use the deletion rules (3) and (4), but using only the swap rules (1) and (2) yields an infinite loop (e.g., \(\texttt{ab} \leftrightarrow \texttt{ba} \leftrightarrow \texttt{ab} \leftrightarrow \cdots\)), so the ARS is \emph{not terminating} overall.\\[1em]
+
+Find two strings that are not equivalent. How many non-equivalent strings can you find?  
+\textbf{Answer:} Two strings not equivalent: \(\texttt{baba} \not\!\leftrightarrow^{*} \texttt{ababa}\). There are infinitely many non-equivalent pairs: strings split by the parity of the number of \(a\)'s (even vs.\ odd), so you can keep making pairs with different \(a\)-parity.\\[1em]
+
+How many equivalence classes does \(\leftrightarrow^{*}\) have? Can you describe them in a nice way? What are the normal forms?  
+\textbf{Answer:} There are \(2\) equivalence classes under \(\leftrightarrow^{*}\):
+(1) strings with an \emph{even} number of \(a\)'s, which reduce to the normal form \(\varepsilon\);
+(2) strings with an \emph{odd} number of \(a\)'s, which reduce to the normal form \(a\).
+Set of normal forms: \(\{\varepsilon, a\}\).\\[1em]
+
+Can you modify the ARS so that it becomes terminating without changing its equivalence classes?  
+\textbf{Answer:} Yes. Drop \(ab \to ba\) and keep \(ba \to ab\), together with \(aa \to \varepsilon\) and \(b \to \varepsilon\).
+This orientation is terminating while preserving the same equivalence classes and normal forms (still \(\{\varepsilon, a\}\)).\\[1em]
+
+Write down a question or two about strings that can be answered using the ARS. Think about whether this amounts to giving a semantics to the ARS.  
+\textbf{Answer:} Given any string \(x \in \{a,b\}^{*}\), does \(x\) reduce to \(\varepsilon\) or to \(a\)?
+Equivalently: is the number of \(a\)'s in \(x\) even or odd? This gives a semantics mapping each string to \(\varepsilon\) (even) or \(a\) (odd).\\[1em]
+
+\textbf{Exercise 5b:} Consider the rewrite rules
+\[
+ab \to ba, \quad ba \to ab, \quad aa \to a, \quad b \to \varepsilon
+\]
+
+Reduce some example strings such as \texttt{abba} and \texttt{bababa}.  
+\textbf{Answer:}
+\[
+\texttt{abba} \;\to\; \texttt{aba} \;\to\; \texttt{aa} \;\to\; a.
+\]
+\[
+\texttt{bababa} \;\to\; \texttt{ababa} \;\to\; \texttt{aaba} \;\to\; \texttt{aaa} \;\to\; \texttt{aa} \;\to\; a.
+\]
+\emph{No rule applies to a single \texttt{a}; this is the farthest you can go.}\\[1em]
+
+Why is the ARS not terminating?  
+\textbf{Answer:} This example still has an infinite chain if you don’t use rules (3) or (4): the swaps \(ab \leftrightarrow ba\) can loop forever.\\[1em]
+
+Find two strings that are not equivalent. How many non-equivalent strings can you find?  
+\textbf{Answer:} Two non-equivalent strings: \(\texttt{bbb} \not\!\leftrightarrow^{*} \texttt{babab}\). There are infinitely many non-equivalent pairs.\\[1em]
+
+How many equivalence classes does \(\leftrightarrow^{*}\) have? Can you describe them in a nice way? What are the normal forms?  
+\textbf{Answer:} There are \(2\) equivalence classes for \(\leftrightarrow^{*}\).  
+If a string has \emph{no} \(a\)’s, its normal form is \(\varepsilon\).  
+If a string has \emph{at least one} \(a\), its normal form is \(a\).  
+Set of normal forms: \(\{\varepsilon, a\}\).\\[1em]
+
+Can you modify the ARS so that it becomes terminating without changing its equivalence classes?  
+\textbf{Answer:} Drop \(ab \to ba\) and keep \(ba \to ab\), along with \(aa \to a\) and \(b \to \varepsilon\).  
+This orientation terminates while preserving the same equivalence classes and normal forms.\\[1em]
+
+Write down a question or two about strings that can be answered using the ARS. Think about whether this amounts to giving a semantics to the ARS.  
+\textbf{Answer:} Given any string \(x \in \{a,b\}^{*}\), does \(x\) contain at least one \(a\)?  
+Equivalently: does \(x\) reduce to \(a\) (some \(a\) present) or to \(\varepsilon\) (no \(a\)’s)?\\[1em]
+
+\subsubsection{Questions}
+
+How does changing the rewrite rule from $aa \to \varepsilon$ to $aa \to a$ resemble differences in evaluation strategies when creating a programming language?
+
+\subsection{Week 4}
+
+\subsubsection{Homework}
+
+\begin{verbatim}
+while b != 0:
+    temp = b
+    b = a % b
+    a = temp
+return a
+\end{verbatim}
+
+The algorithm always terminates provided that.
+\begin{enumerate}
+    \item The inputs satisfy $a \geq 0$ and $b \geq 0$.
+    \item If $b = 0$ initially, the loop terminates immediately.
+    \item For $b > 0$, the remainder operation is defined by the division algorithm: 
+    \[
+    a = qb + r, \quad 0 \leq r < b,
+    \]
+    where $r = a \bmod b$.
+\end{enumerate}
+
+Define the measure function
+\[
+\phi(a,b) = b.
+\]
+
+Consider one loop iteration:
+\[
+(a,b) \mapsto (b,\, a \bmod b).
+\]
+By the division algorithm, 
+\[
+0 \leq a \bmod b < b.
+\]
+Therefore,
+\[
+\phi(a,b) = b > a \bmod b = \phi(b, a \bmod b).
+\]
+Hence $\phi$ strictly decreases with each iteration.
+
+Since $\phi(a,b)$ is a nonnegative integer, it cannot decrease infinitely. After finitely many steps, we must reach $b = 0$, at which point the loop terminates.
+
+\begin{verbatim}
+function merge_sort(arr, left, right):
+    if left >= right:
+        return
+    mid = floor((left + right) / 2)
+    merge_sort(arr, left, mid)
+    merge_sort(arr, mid+1, right)
+    merge(arr, left, mid, right)
+\end{verbatim}
+
+The function
+\[
+\phi(\text{left},\text{right}) \;=\; \text{right} - \text{left} + 1
+\]
+is a measure function for \texttt{merge\_sort} (with integer indices and
+\(\texttt{mid}=\lfloor ( \text{left}+\text{right})/2 \rfloor\)).
+
+Assume \(\text{left},\text{right}\in\mathbb{Z}\) and the procedure is only called with
+\(\text{left}\le \text{right}\). The branching factor is finite (at most two recursive calls).
+
+Let \(n=\phi(\text{left},\text{right})=\text{right}-\text{left}+1\).
+
+\begin{itemize}
+  \item \emph{Base case.} If \(\text{left}\ge \text{right}\) then \(n\le 1\) and the function returns without making recursive calls. No decrease condition needs to be checked.
+
+  \item \emph{Recursive case.} Suppose \(\text{left}<\text{right}\), hence \(n\ge 2\).
+  Set \(\texttt{mid}=\left\lfloor \dfrac{\text{left}+\text{right}}{2}\right\rfloor\).
+  Then \(\text{left}\le \texttt{mid}<\text{right}\), so both subproblems are well-formed:
+  \[
+  (\text{left},\texttt{mid}) \quad\text{and}\quad (\texttt{mid}+1,\text{right}).
+  \]
+  Their measures are
+  \[
+  \phi(\text{left},\texttt{mid})=\texttt{mid}-\text{left}+1
+  \quad\text{and}\quad
+  \phi(\texttt{mid}+1,\text{right})=\text{right}-\texttt{mid}.
+  \]
+  Using \(\texttt{mid}=\left\lfloor \dfrac{\text{left}+\text{right}}{2}\right\rfloor\) and \(n=\text{right}-\text{left}+1\), we get the bounds
+  \[
+  \phi(\text{left},\texttt{mid}) \;\le\; \left\lceil \frac{n}{2} \right\rceil
+  \quad\text{and}\quad
+  \phi(\texttt{mid}+1,\text{right}) \;\le\; \left\lfloor \frac{n}{2} \right\rfloor.
+  \]
+  Since \(n\ge 2\), both \(\left\lceil \dfrac{n}{2}\right\rceil<n\) and \(\left\lfloor \dfrac{n}{2}\right\rfloor<n\) hold. Therefore
+  \[
+  \phi(\text{left},\texttt{mid}) \;<\; \phi(\text{left},\text{right})
+  \qquad\text{and}\qquad
+  \phi(\texttt{mid}+1,\text{right}) \;<\; \phi(\text{left},\text{right}).
+  \]
+  Hence the measure strictly decreases along every recursive edge.
+\end{itemize}
+
+Because \(\phi\) maps states to \(\mathbb{N}\) and strictly decreases with each recursive call,
+no infinite descent is possible. Together with finite branching, this implies termination.
+
+\subsubsection{Questions}
+
+How do different evaluation strategies in programming languages (such as call-by-value vs.\ call-by-name) influence whether a program is guaranteed to terminate, and in what ways can techniques like measure functions help us reason about termination across these strategies?
+
+\subsection{Week 5}
+
+\subsubsection{Homework}
+
+\[
+\textbf{Goal: }\;(\lambda f.\,\lambda x.\, f\,(f\,x))\;(\lambda f.\,\lambda x.\, f\,(f\,(f\,x))).
+\]
+
+\textbf{α–renaming.}
+To avoid variable capture, rename bound variables so the two arguments use distinct names:
+\[
+A \;\equiv\; \lambda f.\,\lambda x.\, f(f\,x)
+\quad\text{and}\quad
+B \;\equiv\; \lambda g.\,\lambda y.\, g(g(g\,y)).
+\]
+The term is \(A\,B\).
+
+\medskip
+\textbf{β–reduction (outer application).}
+\[
+A\,B
+\;\to_\beta\;
+\lambda x.\, B\bigl(B\,x\bigr)
+\quad
+\text{(substitute } f := B \text{ in } f(f\,x)).
+\]
+
+\medskip
+\textbf{β–reduction of } \(B\,x\).
+\[
+B\,x
+=
+(\lambda g.\,\lambda y.\, g(g(g\,y)))\,x
+\;\to_\beta\;
+\lambda y.\, x\bigl(x(x\,y)\bigr).
+\]
+Name this \(B_x \equiv \lambda y.\, x^3(y)\), where \(x^k\) denotes \(k\)-fold self-composition.
+
+\medskip
+\textbf{β–reduction of } \(B\,(B_x)\).
+\[
+B\,(B_x)
+=
+(\lambda g.\,\lambda y.\, g(g(g\,y)))\,(\lambda y.\,x^3(y))
+\;\to_\beta\;
+\lambda y.\, B_x\bigl(B_x\,(B_x\,y)\bigr).
+\]
+Since \(B_x\,y = x^3(y)\), we compute
+\[
+B_x\bigl(B_x\,y\bigr) = B_x\bigl(x^3(y)\bigr) = x^3\!\bigl(x^3(y)\bigr) = x^6(y),
+\]
+and then
+\[
+B_x\bigl(B_x\,(B_x\,y)\bigr)
+= B_x\bigl(x^6(y)\bigr)
+= x^3\!\bigl(x^6(y)\bigr)
+= x^9(y).
+\]
+Hence
+\[
+B\,(B_x) \;\to\; \lambda y.\, x^9(y).
+\]
+
+\medskip
+\textbf{Assemble the result.}
+\[
+\lambda x.\, B\,(B\,x)
+\;\to\;
+\lambda x.\,\lambda y.\, x^9(y).
+\]
+Renaming \(x\mapsto f\) and \(y\mapsto a\) gives the canonical Church-numeral form
+\[
+\boxed{\lambda f.\,\lambda a.\, f^9(a)}.
+\]
+Thus
+\[
+(\lambda f.\,\lambda x.\, f(f\,x))\;(\lambda f.\,\lambda x.\, f(f(f\,x)))
+\;=\;
+\lambda f.\,\lambda x.\, f^9(x).
+\]
+
+\bigskip
+\textbf{Remark (mathematical interpretation).}
+In Church encodings, natural numbers are functions that iterate an endofunction:
+\[
+n \;\equiv\; \lambda f.\,\lambda x.\, f^{\,n}(x).
+\]
+Here,
+\(
+\lambda f.\lambda x.\, f(f\,x)
+\)
+is the numeral \(2\) (“apply \(f\) twice”) and
+\(
+\lambda f.\lambda x.\, f(f(f\,x))
+\)
+is the numeral \(3\) (“apply \(f\) thrice”).
+Applying one numeral to another composes iterations and realizes \emph{exponentiation by iteration}:
+\[
+(2\;3) \;=\; \lambda x.\, 3^{\,2}(x) \;=\; \lambda f.\lambda x.\, f^{9}(x),
+\]
+so the result corresponds to the number \(9 = 3^2\).
+Conceptually, this is \emph{function iteration}: “do thrice, then do thrice again” \(=\) “do nine times.”
+Before computers, Church’s lambda calculus provided a purely symbolic foundation where numbers are actions (iterations) on functions; your reduction is exactly the arithmetic law that composing “apply-thrice” with itself yields “apply-nine-times.”
+
+
+\subsubsection{Questions}
+
+Since Church numerals let us represent arithmetic entirely through function application, what does that suggest about the nature of mathematics—are operations like addition, multiplication, and exponentiation really ‘just’ repeated patterns of substitution and iteration?
+
+\subsection{Week 6}
+
+\subsubsection{Homework}
+
+\section*{Evaluating \texorpdfstring{$\mathtt{fact}\;3$}{fact 3} with \texorpdfstring{$\mathtt{fix}$}{fix}, \texorpdfstring{$\mathtt{let}$}{let}, and \texorpdfstring{$\mathtt{let\ rec}$}{let rec}}
+
+\noindent\textbf{Rules}
+\[
+\begin{aligned}
+\mathtt{fix}\;F &\;\to\; F\,(\mathtt{fix}\;F) &&\text{(def of $\mathtt{fix}$)}\\[2pt]
+\mathtt{let}\;x = e_1\;\mathtt{in}\;e_2 &\;\to\; (\lambda x.\,e_2)\,e_1 &&\text{(def of $\mathtt{let}$)}\\[2pt]
+\mathtt{let\ rec}\;f = e_1\;\mathtt{in}\;e_2 &\;\to\; \mathtt{let}\;f = \mathtt{fix}\,(\lambda f.\,e_1)\;\mathtt{in}\;e_2 
+&&\text{(def of $\mathtt{let\ rec}$)}
+\end{aligned}
+\]
+
+\noindent\textbf{Abbreviation}\quad
+\(F \;\equiv\; \lambda f.\,\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * f\,(n-1).\)
+
+\medskip
+
+\noindent\textbf{Target term}
+\[
+\mathtt{let\ rec}\; \mathtt{fact} = \lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1)\; \mathtt{in}\; \mathtt{fact}\;3.
+\]
+
+\noindent\textbf{Derivation (each step labeled)}
+
+\begingroup
+\allowdisplaybreaks
+\[
+\begin{aligned}
+&\mathtt{let\ rec}\; \mathtt{fact} = \lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1)\; \mathtt{in}\; \mathtt{fact}\;3\\
+%
+&\xrightarrow{\text{def of let rec}}
+\mathtt{let}\; \mathtt{fact} = \mathtt{fix}\,(\lambda \mathtt{fact}.\;\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1))\; \mathtt{in}\; \mathtt{fact}\;3\\
+%
+&\xrightarrow{\text{def of let}}
+(\lambda \mathtt{fact}.\; \mathtt{fact}\;3)\; \mathtt{fix}\,(\lambda \mathtt{fact}.\;\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1))\\
+%
+&\xrightarrow{\beta}
+\big(\mathtt{fix}\,(\lambda \mathtt{fact}.\;\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1))\big)\;3\\[2pt]
+&= (\mathtt{fix}\;F)\;3\\
+%
+&\xrightarrow{\text{def of fix}}
+\big(F\,(\mathtt{fix}\;F)\big)\;3\\
+%
+&\xrightarrow{\beta}
+\big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;3\\
+%
+&\xrightarrow{\beta}
+\mathtt{if}\; 3=0\; \mathtt{then}\; 1\; \mathtt{else}\; 3 * (\mathtt{fix}\;F)\,2\\
+%
+&\xrightarrow{\text{def of if}}
+3 * (\mathtt{fix}\;F)\,2
+\end{aligned}
+\]
+\endgroup
+
+\noindent Expand $(\mathtt{fix}\;F)\,2$:
+
+\[
+\begin{aligned}
+(\mathtt{fix}\;F)\,2
+&\xrightarrow{\text{def of fix}} \big(F\,(\mathtt{fix}\;F)\big)\,2
+\xrightarrow{\beta} \big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;2\\
+&\xrightarrow{\beta} \mathtt{if}\; 2=0\; \mathtt{then}\; 1\; \mathtt{else}\; 2 * (\mathtt{fix}\;F)\,1
+\xrightarrow{\text{def of if}} 2 * (\mathtt{fix}\;F)\,1.
+\end{aligned}
+\]
+
+\noindent Expand $(\mathtt{fix}\;F)\,1$:
+
+\[
+\begin{aligned}
+(\mathtt{fix}\;F)\,1
+&\xrightarrow{\text{def of fix}} \big(F\,(\mathtt{fix}\;F)\big)\,1
+\xrightarrow{\beta} \big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;1\\
+&\xrightarrow{\beta} \mathtt{if}\; 1=0\; \mathtt{then}\; 1\; \mathtt{else}\; 1 * (\mathtt{fix}\;F)\,0
+\xrightarrow{\text{def of if}} 1 * (\mathtt{fix}\;F)\,0.
+\end{aligned}
+\]
+
+\noindent Base case $(\mathtt{fix}\;F)\,0$:
+
+\[
+\begin{aligned}
+(\mathtt{fix}\;F)\,0
+&\xrightarrow{\text{def of fix}} \big(F\,(\mathtt{fix}\;F)\big)\,0
+\xrightarrow{\beta} \big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;0\\
+&\xrightarrow{\beta} \mathtt{if}\; 0=0\; \mathtt{then}\; 1\; \mathtt{else}\; 0 * (\mathtt{fix}\;F)\,(-1)
+\xrightarrow{\text{def of if}} 1.
+\end{aligned}
+\]
+
+\noindent Back-substitute the arithmetic:
+\[
+(\mathtt{fix}\;F)\,0 = 1,\quad
+(\mathtt{fix}\;F)\,1 = 1,\quad
+(\mathtt{fix}\;F)\,2 = 2,\quad
+(\mathtt{fix}\;F)\,3 = \boxed{6}.
+\]
+
+
+
+\subsubsection{Questions}
+
+If the $\mathtt{fix}$ operator allows a function to ``refer to itself'' without any explicit naming or looping construct, what does that reveal about recursion as a \emph{mathematical} idea rather than merely a \emph{programming} one? 
+
+Does this suggest that self-reference---and therefore recursion---emerges purely from the rules of substitution and function application, rather than from syntactic features like \texttt{while} or \texttt{for} loops?
+
+\section{Essay}
+
+\section{Evidence of Participation}
+
+\section{Conclusion}\label{conclusion}
+
+\begin{thebibliography}{99}
+\bibitem[BLA]{bla} Author, \href{https://en.wikipedia.org/wiki/LaTeX}{Title}, Publisher, Year.
+\end{thebibliography}
+
+\end{document}
