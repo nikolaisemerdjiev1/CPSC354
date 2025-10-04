@@ -1,4 +1,5 @@
 \documentclass{article}
+\documentclass[11pt]{article}
 
 \usepackage{tikz} 
 \usetikzlibrary{automata, positioning, arrows} 
@@ -24,6 +25,8 @@
 \usepackage[T1]{fontenc}  
 \usepackage{quiver}
 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -548,7 +551,7 @@ Let \(n=\phi(\text{left},\text{right})=\text{right}-\text{left}+1\).
 Because \(\phi\) maps states to \(\mathbb{N}\) and strictly decreases with each recursive call,
 no infinite descent is possible. Together with finite branching, this implies termination.
 
-\subsection{Questions}
+\subsubsection{Questions}
 
 How do different evaluation strategies in programming languages (such as call-by-value vs.\ call-by-name) influence whether a program is guaranteed to terminate, and in what ways can techniques like measure functions help us reason about termination across these strategies?
 
@@ -660,6 +663,117 @@ Before computers, Church’s lambda calculus provided a purely symbolic foundati
 \subsubsection{Questions}
 
 Since Church numerals let us represent arithmetic entirely through function application, what does that suggest about the nature of mathematics—are operations like addition, multiplication, and exponentiation really ‘just’ repeated patterns of substitution and iteration?
+
+\subsection{Week 6}
+
+\subsubsection{Homework}
+
+\section*{Evaluating \texorpdfstring{$\mathtt{fact}\;3$}{fact 3} with \texorpdfstring{$\mathtt{fix}$}{fix}, \texorpdfstring{$\mathtt{let}$}{let}, and \texorpdfstring{$\mathtt{let\ rec}$}{let rec}}
+
+\noindent\textbf{Rules}
+\[
+\begin{aligned}
+\mathtt{fix}\;F &\;\to\; F\,(\mathtt{fix}\;F) &&\text{(def of $\mathtt{fix}$)}\\[2pt]
+\mathtt{let}\;x = e_1\;\mathtt{in}\;e_2 &\;\to\; (\lambda x.\,e_2)\,e_1 &&\text{(def of $\mathtt{let}$)}\\[2pt]
+\mathtt{let\ rec}\;f = e_1\;\mathtt{in}\;e_2 &\;\to\; \mathtt{let}\;f = \mathtt{fix}\,(\lambda f.\,e_1)\;\mathtt{in}\;e_2 
+&&\text{(def of $\mathtt{let\ rec}$)}
+\end{aligned}
+\]
+
+\noindent\textbf{Abbreviation}\quad
+\(F \;\equiv\; \lambda f.\,\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * f\,(n-1).\)
+
+\medskip
+
+\noindent\textbf{Target term}
+\[
+\mathtt{let\ rec}\; \mathtt{fact} = \lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1)\; \mathtt{in}\; \mathtt{fact}\;3.
+\]
+
+\noindent\textbf{Derivation (each step labeled)}
+
+\begingroup
+\allowdisplaybreaks
+\[
+\begin{aligned}
+&\mathtt{let\ rec}\; \mathtt{fact} = \lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1)\; \mathtt{in}\; \mathtt{fact}\;3\\
+%
+&\xrightarrow{\text{def of let rec}}
+\mathtt{let}\; \mathtt{fact} = \mathtt{fix}\,(\lambda \mathtt{fact}.\;\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1))\; \mathtt{in}\; \mathtt{fact}\;3\\
+%
+&\xrightarrow{\text{def of let}}
+(\lambda \mathtt{fact}.\; \mathtt{fact}\;3)\; \mathtt{fix}\,(\lambda \mathtt{fact}.\;\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1))\\
+%
+&\xrightarrow{\beta}
+\big(\mathtt{fix}\,(\lambda \mathtt{fact}.\;\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * \mathtt{fact}\,(n-1))\big)\;3\\[2pt]
+&= (\mathtt{fix}\;F)\;3\\
+%
+&\xrightarrow{\text{def of fix}}
+\big(F\,(\mathtt{fix}\;F)\big)\;3\\
+%
+&\xrightarrow{\beta}
+\big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;3\\
+%
+&\xrightarrow{\beta}
+\mathtt{if}\; 3=0\; \mathtt{then}\; 1\; \mathtt{else}\; 3 * (\mathtt{fix}\;F)\,2\\
+%
+&\xrightarrow{\text{def of if}}
+3 * (\mathtt{fix}\;F)\,2
+\end{aligned}
+\]
+\endgroup
+
+\noindent Expand $(\mathtt{fix}\;F)\,2$:
+
+\[
+\begin{aligned}
+(\mathtt{fix}\;F)\,2
+&\xrightarrow{\text{def of fix}} \big(F\,(\mathtt{fix}\;F)\big)\,2
+\xrightarrow{\beta} \big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;2\\
+&\xrightarrow{\beta} \mathtt{if}\; 2=0\; \mathtt{then}\; 1\; \mathtt{else}\; 2 * (\mathtt{fix}\;F)\,1
+\xrightarrow{\text{def of if}} 2 * (\mathtt{fix}\;F)\,1.
+\end{aligned}
+\]
+
+\noindent Expand $(\mathtt{fix}\;F)\,1$:
+
+\[
+\begin{aligned}
+(\mathtt{fix}\;F)\,1
+&\xrightarrow{\text{def of fix}} \big(F\,(\mathtt{fix}\;F)\big)\,1
+\xrightarrow{\beta} \big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;1\\
+&\xrightarrow{\beta} \mathtt{if}\; 1=0\; \mathtt{then}\; 1\; \mathtt{else}\; 1 * (\mathtt{fix}\;F)\,0
+\xrightarrow{\text{def of if}} 1 * (\mathtt{fix}\;F)\,0.
+\end{aligned}
+\]
+
+\noindent Base case $(\mathtt{fix}\;F)\,0$:
+
+\[
+\begin{aligned}
+(\mathtt{fix}\;F)\,0
+&\xrightarrow{\text{def of fix}} \big(F\,(\mathtt{fix}\;F)\big)\,0
+\xrightarrow{\beta} \big(\lambda n.\; \mathtt{if}\; n=0\; \mathtt{then}\; 1\; \mathtt{else}\; n * (\mathtt{fix}\;F)\,(n-1)\big)\;0\\
+&\xrightarrow{\beta} \mathtt{if}\; 0=0\; \mathtt{then}\; 1\; \mathtt{else}\; 0 * (\mathtt{fix}\;F)\,(-1)
+\xrightarrow{\text{def of if}} 1.
+\end{aligned}
+\]
+
+\noindent Back-substitute the arithmetic:
+\[
+(\mathtt{fix}\;F)\,0 = 1,\quad
+(\mathtt{fix}\;F)\,1 = 1,\quad
+(\mathtt{fix}\;F)\,2 = 2,\quad
+(\mathtt{fix}\;F)\,3 = \boxed{6}.
+\]
+
+
+
+\subsubsection{Questions}
+
+If the $\mathtt{fix}$ operator allows a function to ``refer to itself'' without any explicit naming or looping construct, what does that reveal about recursion as a \emph{mathematical} idea rather than merely a \emph{programming} one? 
+
+Does this suggest that self-reference---and therefore recursion---emerges purely from the rules of substitution and function application, rather than from syntactic features like \texttt{while} or \texttt{for} loops?
 
 \section{Essay}
 
