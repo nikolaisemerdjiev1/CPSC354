@@ -893,6 +893,166 @@ Does this suggest that self-reference---and therefore recursion---emerges purely
 \subsubsection{Questions}
 When a grammar allows multiple ways to parse the same expression, such as different groupings of additions and multiplications, how can we modify or design the grammar so that the parse tree always reflects the correct operator precedence and associativity?
 
+\subsection{Week 8}
+
+\subsubsection{Homework}
+
+\section*{Level 5/8: \textit{Adding zero}}
+
+\paragraph{Question.}
+Prove, for natural numbers \(a,b,c\),
+\[
+a + (b + 0) + (c + 0) \;=\; a + b + c.
+\]
+
+\begin{solution}
+Using the identity \(x + 0 = x\) (often named \(\texttt{add\_zero}\)) twice:
+\[
+\begin{aligned}
+a + (b + 0) + (c + 0)
+&= a + b + (c + 0) &&\text{(by } b+0=b\text{)}\\
+&= a + b + c       &&\text{(by } c+0=c\text{).}
+\end{aligned}
+\]
+\medskip
+\noindent\textbf{Lean script.}
+\begin{lstlisting}
+-- Objects: a b c : ℕ
+rw [add_zero]      -- a + (b + 0) + (c + 0)  ==>  a + b + (c + 0)
+rw [add_zero]      -- a + b + (c + 0)       ==>  a + b + c
+rfl                -- both sides now identical
+\end{lstlisting}
+\end{solution}
+
+\bigskip
+
+\section*{Level 6/8: \textit{Precision rewriting}}
+
+\paragraph{Question.}
+Prove, for natural numbers \(a,b,c\),
+\[
+a + (b + 0) + (c + 0) \;=\; a + b + c,
+\]
+but emphasize \emph{targeted} rewriting (i.e., rewriting only the needed subterm each step).
+
+\begin{solution}
+Same identities as above, but apply them precisely to the subterm containing \(0\):
+\[
+\begin{aligned}
+a + (b + 0) + (c + 0)
+&= a + b + (c + 0) &&\text{rewrite only the inner }(b+0)\\
+&= a + b + c       &&\text{now rewrite the remaining }(c+0).
+\end{aligned}
+\]
+\medskip
+\noindent\textbf{Lean script (one precise rewrite at a time).}
+\begin{lstlisting}
+-- Objects: a b c : ℕ
+rw [add_zero]      -- rewrite (b + 0) -> b
+rw [add_zero]      -- rewrite (c + 0) -> c
+rfl
+\end{lstlisting}
+(If the goal were more complicated, one could direct a rewrite to a specific occurrence using a location, e.g. `rw [add_zero] at h` or `simp [add_zero]` with side conditions.)
+\end{solution}
+
+\bigskip
+
+\section*{Level 7/8: \textit{add\_succ}}
+
+\paragraph{Theorem (stated).}
+\[
+\forall n:\mathbb{N},\quad n.\mathrm{succ} \;=\; n + 1.
+\]
+
+\paragraph{Useful lemmas.}
+\[
+\begin{aligned}
+1 &= \mathrm{succ}(0) &&\text{(named \texttt{one\_eq\_succ\_zero})},\\
+n + \mathrm{succ}(k) &= \mathrm{succ}(n + k) &&\text{(named \texttt{add\_succ})},\\
+n + 0 &= n &&\text{(named \texttt{add\_zero}).}
+\end{aligned}
+\]
+
+\begin{solution}
+\[
+\begin{aligned}
+n.\mathrm{succ}
+&= n + 0.\mathrm{succ} &&\text{(since } \mathrm{succ}(x) = x+1 \text{, we move via }1=\mathrm{succ}(0))\\
+&= \mathrm{succ}(n + 0) &&\text{by } \texttt{add\_succ}\\
+&= \mathrm{succ}(n) &&\text{by } \texttt{add\_zero}\\
+&= n + 1 &&\text{unwinding } 1=\mathrm{succ}(0).
+\end{aligned}
+\]
+Concretely (mirroring your screenshot), we first rewrite the \(1\) as \(\mathrm{succ}(0)\), then use \(\texttt{add\_succ}\), then \(\texttt{add\_zero}\), and finish with reflexivity.
+\medskip
+
+\noindent\textbf{Lean script (exact sequence from the level).}
+\begin{lstlisting}
+-- Goal: n.succ = n + 1
+rw [one_eq_succ_zero]   -- turn 1 into succ 0 on the RHS
+rw [add_succ]           -- n + succ 0  ->  (n + 0).succ
+rw [add_zero]           -- (n + 0).succ -> n.succ
+rfl                     -- both sides are n.succ
+\end{lstlisting}
+\end{solution}
+
+\bigskip\bigskip
+\noindent\emph{Notes.}
+\begin{itemize}
+  \item Levels 5 and 6 highlight the same identity \(x+0=x\) but train you to control \emph{where} a rewrite happens.
+  \item Level 7 chains small lemmas to reach a familiar arithmetic fact: \(n+1=\mathrm{succ}(n)\).
+\end{itemize}
+
+\section*{Question 8 — Natural–Language Proof (Level 8: $2+2=4$)}
+
+\paragraph{Goal.} Prove that $2+2=4$ in Peano arithmetic.
+
+\paragraph{Background/Definitions.}
+Let $0$ be the base natural number and let $\mathrm{succ}(n)$ (sometimes written $n.succ$) denote the successor of $n$.
+Define the numerals
+\[
+1 \;=\; \mathrm{succ}(0),\qquad
+2 \;=\; \mathrm{succ}(1),\qquad
+3 \;=\; \mathrm{succ}(2),\qquad
+4 \;=\; \mathrm{succ}(3).
+\]
+Addition is defined by the standard recursion rules:
+\[
+\text{(add\_zero)}\quad n+0=n,
+\qquad
+\text{(add\_succ)}\quad n+\mathrm{succ}(k)=\mathrm{succ}(n+k).
+\]
+
+\paragraph{Proof.}
+We compute $2+2$ using only the recursion rules for $+$ and the numeral definitions.
+
+\begin{align*}
+2+2
+&= \mathrm{succ}(1) + \mathrm{succ}(1) && \text{(by the definition of $2$)}\\
+&= \mathrm{succ}\big(\,\mathrm{succ}(1) + 1\,\big) && \text{(by \textit{add\_succ} with $n=\mathrm{succ}(1),\,k=1$)}\\
+&= \mathrm{succ}\big(\,\mathrm{succ}(1) + \mathrm{succ}(0)\,\big) && \text{(since $1=\mathrm{succ}(0)$)}\\
+&= \mathrm{succ}\Big(\,\mathrm{succ}\big(\,\mathrm{succ}(1) + 0\,\big)\Big) && \text{(by \textit{add\_succ} with $n=\mathrm{succ}(1),\,k=0$)}\\
+&= \mathrm{succ}\Big(\,\mathrm{succ}\big(\,\mathrm{succ}(1)\,\big)\Big) && \text{(by \textit{add\_zero}: $\mathrm{succ}(1)+0=\mathrm{succ}(1)$)}\\
+&= \mathrm{succ}\big(\,\mathrm{succ}(\mathrm{succ}(1))\,\big)\\
+&= \mathrm{succ}\big(\,\mathrm{succ}(\mathrm{succ}(\mathrm{succ}(0)))\,\big) && \text{(since $1=\mathrm{succ}(0)$)}\\
+&= \mathrm{succ}(\mathrm{succ}(\mathrm{succ}(\mathrm{succ}(0)))))\\
+&= 4 && \text{(by the definition of $4$).}
+\end{align*}
+
+Therefore, $2+2=4$.
+\qed
+
+\paragraph{(Optional) Lean step correspondence.}
+The proof above mirrors the scripted steps:
+\[
+\texttt{rw [four\_eq\_succ\_three]\; rw [three\_eq\_succ\_two]\; rw [two\_eq\_succ\_one]\; rw [one\_eq\_succ\_zero]\; rw [add\_succ]\; rw [add\_zero]\; rfl.}
+\]
+
+\subsubsection{Questions}
+In Peano arithmetic, every arithmetic fact—such as $2+2=4$—is proven step by step from simple definitions like $0$ and $\mathrm{succ}(n)$. 
+What does this tell us about how much of mathematics can be built from just a few basic rules, and why might this level of formality be both powerful and limiting when compared to the way we usually do arithmetic?
+
+
 \section{Essay}
 
 \section{Evidence of Participation}
