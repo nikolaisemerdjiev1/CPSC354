@@ -1052,6 +1052,75 @@ The proof above mirrors the scripted steps:
 In Peano arithmetic, every arithmetic fact—such as $2+2=4$—is proven step by step from simple definitions like $0$ and $\mathrm{succ}(n)$. 
 What does this tell us about how much of mathematics can be built from just a few basic rules, and why might this level of formality be both powerful and limiting when compared to the way we usually do arithmetic?
 
+\subsection{Week 9}
+
+\subsubsection{Homework}
+
+Here’s a compile-ready LaTeX block you can drop into your Week 9 report. It contains **two solutions** for Addition World – **Level 5: (\mathsf{add_right_comm})**: one by **induction** (spelled out in English math) and one **without induction** (a short proof using the lemma `add_right_comm`). I’ve also included the Lean scripts that match each proof.
+
+```latex
+\section*{Addition World — Level 5: \texorpdfstring{$\mathsf{add\_right\_comm}$}{add\_right\_comm}}
+
+\paragraph{Theorem (goal).}
+For all natural numbers \(a,b,c\),
+\[
+a + b + c \;=\; a + c + b .
+\]
+
+\subsection*{Solution A: Inductive proof on \texorpdfstring{$b$}{b} (no tactics required to understand)}
+We use the Peano rules for addition:
+\[
+\text{(add\_zero)}\; n+0=n,\qquad
+\text{(add\_succ)}\; n+\operatorname{succ}(k)=\operatorname{succ}(n+k),
+\]
+together with associativity \((x+y)+z=x+(y+z)\) and commutativity \(x+y=y+x\).
+
+\paragraph{Claim.} For all \(a,c\), \(P(b):\; a+b+c=a+c+b\) holds by induction on \(b\).
+
+\emph{Base case \(b=0\).}
+\[
+a+0+c \;=\; a+c \;=\; a+c+0,
+\]
+by two uses of \(\text{add\_zero}\). Hence \(P(0)\) holds.
+
+\emph{Inductive step.} Assume \(P(b)\) holds, i.e.
+\[
+a+b+c \;=\; a+c+b
+\quad\text{for all }a,c.
+\]
+We must show \(P(\operatorname{succ} b)\):
+\[
+a+\operatorname{succ}b+c \;=\; a+c+\operatorname{succ}b.
+\]
+Compute:
+\[
+\begin{aligned}
+a+\operatorname{succ}b+c
+&= (a+\operatorname{succ}b)+c\\
+&= \operatorname{succ}(a+b)+c &&\text{(by \(\text{add\_succ}\))}\\
+&= \operatorname{succ}\big((a+b)+c\big) &&\text{(by \(\text{succ\_add}\): }\operatorname{succ}x+c=\operatorname{succ}(x+c))\\
+&= \operatorname{succ}(a+b+c) &&\text{(associativity)}\\
+&= \operatorname{succ}(a+c+b) &&\text{(induction hypothesis)}\\
+&= a+c+\operatorname{succ}b &&\text{(reverse of \(\text{add\_succ}\)).}
+\end{aligned}
+\]
+Thus \(P(\operatorname{succ}b)\) holds, and by induction \(a+b+c=a+c+b\) for all \(a,b,c\).
+
+\subsection*{Solution B: Direct proof \emph{without} induction (one-line rewrite)}
+If the library lemma \(\mathsf{add\_right\_comm}\) is available, it states exactly
+\[
+x + y + z \;=\; x + z + y .
+\]
+Therefore, taking \(x=a\), \(y=b\), \(z=c\) gives the result immediately:
+\[
+a + b + c \;=\; a + c + b.
+\]
+
+
+\subsubsection{Questions}
+Why do we need induction to prove some arithmetic properties like commutativity or associativity, but not others? 
+In other words, what makes a property like $a + b + c = a + c + b$ provable directly from existing lemmas, 
+while others require an inductive step on one of the variables?
 
 \section{Essay}
 
