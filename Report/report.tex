@@ -1122,6 +1122,47 @@ Why do we need induction to prove some arithmetic properties like commutativity 
 In other words, what makes a property like $a + b + c = a + c + b$ provable directly from existing lemmas, 
 while others require an inductive step on one of the variables?
 
+\subsection{Week 10}
+
+\subsubsection{Homework}
+\section*{Lean Logic Game — Party Snacks (Levels 6–9, one line each)}
+
+\subsection*{Level 6: \texttt{and\_imp}}
+
+\noindent\textbf{One-liner:}
+\begin{lstlisting}
+exact (fun c => fun d => h (And.intro c d))
+-- equivalently: exact fun c d => h ⟨c, d⟩
+\end{lstlisting}
+
+\subsection*{Level 7: \texttt{and\_imp 2}}
+
+\noindent\textbf{One-liner:}
+\begin{lstlisting}
+exact (fun hd => h hd.left hd.right)
+-- equivalently: exact fun ⟨hc, hd⟩ => h hc hd
+\end{lstlisting}
+
+\subsection*{Level 8: \texttt{Distribute}}
+
+\noindent\textbf{One-liner:}
+\begin{lstlisting}
+exact fun s => And.intro (h.left s) (h.right s)
+-- equivalently: exact fun s => ⟨h.left s, h.right s⟩
+\end{lstlisting}
+
+\subsection*{Level 9: \texttt{Uncertain Snacks}}
+
+\noindent\textbf{One-liner:}
+\begin{lstlisting}
+exact fun r => And.intro (fun _ : S => r) (fun _ : ¬ S => r)
+-- equivalently: exact fun r => ((fun _ : S => r), (fun _ : ¬ S => r))
+\end{lstlisting}
+
+\subsubsection{Questions}
+How does writing logical proofs as functions in Lean change the way we think about reasoning with implications? 
+Does it make the structure of logical arguments clearer compared to traditional symbolic proofs on paper?
+
 \section{Essay}
 
 \section{Evidence of Participation}
