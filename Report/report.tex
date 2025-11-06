@@ -1163,6 +1163,57 @@ exact fun r => And.intro (fun _ : S => r) (fun _ : ¬ S => r)
 How does writing logical proofs as functions in Lean change the way we think about reasoning with implications? 
 Does it make the structure of logical arguments clearer compared to traditional symbolic proofs on paper?
 
+\subsection{Week 11}
+
+\subsubsection{Homework}
+
+\section*{Lean Logic Game — Negation (Levels 9–12, one line each)}
+
+\subsection*{Level 9 / 12: Implies a Negation}
+\textbf{Problem.}
+\[
+\text{example }(A\,P:\mathrm{Prop})\,(h:P\to \lnot A):\ \lnot(P\land A)
+\]
+\textbf{One-line solution (Lean).}
+\begin{lstlisting}
+exact fun (p, a) => (h p) a
+\end{lstlisting}
+
+\subsection*{Level 10 / 12: Conjunction Implication}
+\textbf{Problem.}
+\[
+\text{example }(A\,P:\mathrm{Prop})\,(h:\lnot(P\land A)):\ P\to \lnot A
+\]
+\textbf{One-line solution (Lean).}
+\begin{lstlisting}
+exact fun p a => h (p, a)
+\end{lstlisting}
+
+\subsection*{Level 11 / 12: \texttt{not\_not\_not}}
+\textbf{Problem.}
+\[
+\text{example }(A:\mathrm{Prop})\,(h:\lnot\lnot\lnot A):\ \lnot A
+\]
+\textbf{One-line solution (Lean).}
+\begin{lstlisting}
+exact fun a => h (fun na => na a)
+\end{lstlisting}
+
+
+\subsection*{Level 12 / 12: \texttt{\textasciitilde Intro Boss}}
+\textbf{Problem.}
+\[
+\text{example }(B\,C:\mathrm{Prop})\,(h:\lnot(B+C)):\ \lnot\lnot B
+\]
+\textbf{One-line solution (Lean).}
+\begin{lstlisting}
+exact fun nB => h (fun b => False.elim (nB b))
+\end{lstlisting}
+
+\subsubsection{Questions}
+How does encoding \(\lnot A\) as \(A\to \mathrm{False}\) help us construct one-line proofs using only function application? 
+Does this viewpoint make the structure of negation proofs clearer than traditional derivations?
+
 \section{Essay}
 
 \section{Evidence of Participation}
