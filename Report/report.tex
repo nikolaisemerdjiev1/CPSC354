@@ -29,6 +29,8 @@
 
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
+\newcommand{\lam}{\lambda}
+\newcommand{\map}{\Rightarrow}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -1213,6 +1215,106 @@ exact fun nB => h (fun b => False.elim (nB b))
 \subsubsection{Questions}
 How does encoding \(\lnot A\) as \(A\to \mathrm{False}\) help us construct one-line proofs using only function application? 
 Does this viewpoint make the structure of negation proofs clearer than traditional derivations?
+
+\subsection{Week 12}
+
+\subsubsection{Homework}
+
+\section*{Towers of Hanoi (2025) — Activity Write-up (n = 5, from peg 0 to peg 2)}
+
+\subsection*{Algorithm (rules)}
+\[
+\begin{aligned}
+\textsf{hanoi}\;1\;x\;y &\;=\; \textsf{move}\;x\;y\\
+\textsf{hanoi}\;(n{+}1)\;x\;y &\;=\;
+  \textsf{hanoi}\;n\;x\;(\textsf{other}\;x\;y)\,;\;
+  \textsf{move}\;x\;y\,;\;
+  \textsf{hanoi}\;n\;(\textsf{other}\;x\;y)\;y
+\end{aligned}
+\]
+
+\subsection*{(1) Completed execution trace for \textsf{hanoi} 5 0 2}
+\small
+\begin{verbatim}
+hanoi 5 0 2
+    hanoi 4 0 1
+        hanoi 3 0 2
+            hanoi 2 0 1
+                hanoi 1 0 2 = move 0 2
+                move  0 1
+                hanoi 1 2 1 = move 2 1
+            move  0 2
+            hanoi 2 1 2
+                hanoi 1 1 0 = move 1 0
+                move  1 2
+                hanoi 1 0 2 = move 0 2
+        move  0 1
+        hanoi 3 2 1
+            hanoi 2 2 0
+                hanoi 1 2 1 = move 2 1
+                move  2 0
+                hanoi 1 1 0 = move 1 0
+            move  2 1
+            hanoi 2 0 1
+                hanoi 1 0 2 = move 0 2
+                move  0 1
+                hanoi 1 2 1 = move 2 1
+    move  0 2
+    hanoi 4 1 2
+        hanoi 3 1 0
+            hanoi 2 1 2
+                hanoi 1 1 0 = move 1 0
+                move  1 2
+                hanoi 1 0 2 = move 0 2
+            move  1 0
+            hanoi 2 2 0
+                hanoi 1 2 1 = move 2 1
+                move  2 0
+                hanoi 1 1 0 = move 1 0
+        move  1 2
+        hanoi 3 0 2
+            hanoi 2 0 1
+                hanoi 1 0 2 = move 0 2
+                move  0 1
+                hanoi 1 2 1 = move 2 1
+            move  0 2
+            hanoi 2 1 2
+                hanoi 1 1 0 = move 1 0
+                move  1 2
+                hanoi 1 0 2 = move 0 2
+\end{verbatim}
+\normalsize
+
+\subsection*{(2) Moves extracted from the trace (in order)}
+Each line \texttt{move x y} is a move of the top disk from peg \(x\) to peg \(y\).  
+There are \(2^5{-}1=31\) moves, the minimal number for \(n{=}5\).
+
+\[
+\begin{aligned}
+&(0\!\to\!2),\ (0\!\to\!1),\ (2\!\to\!1),\ (0\!\to\!2),\ (1\!\to\!0),\ (1\!\to\!2),\ (0\!\to\!2),\\
+&(0\!\to\!1),\ (2\!\to\!1),\ (2\!\to\!0),\ (1\!\to\!0),\ (2\!\to\!1),\ (0\!\to\!2),\ (0\!\to\!1),\ (2\!\to\!1),\\
+&(0\!\to\!2),\\
+&(1\!\to\!0),\ (1\!\to\!2),\ (0\!\to\!2),\ (1\!\to\!0),\ (2\!\to\!1),\ (2\!\to\!0),\ (1\!\to\!0),\\
+&(1\!\to\!2),\\
+&(0\!\to\!2),\ (0\!\to\!1),\ (2\!\to\!1),\ (0\!\to\!2),\ (1\!\to\!0),\ (1\!\to\!2),\ (0\!\to\!2).
+\end{aligned}
+\]
+
+\subsection*{(3) How to verify against the online Towers of Hanoi}
+\begin{enumerate}[leftmargin=1.3em]
+  \item Open the online Towers of Hanoi and set \(n=5\), source peg \(0\), target peg \(2\).
+  \item Play the moves above in order; every move is legal (never places a larger disk on a smaller one).
+  \item You will finish in exactly \(31\) moves, which is minimal for \(n=5\).
+  \item (Why this works.) The algorithm preserves the invariant “the top \(k\) disks are always in legal configuration”, and the recursive pattern
+    \[
+      \textsf{hanoi}\;n\;x\;y = 
+      \textsf{hanoi}\;(n{-}1)\;x\;z;\ \textsf{move}\;x\;y;\ \textsf{hanoi}\;(n{-}1)\;z\;y
+    \]
+    ensures inductively that the largest disk moves exactly once (midpoint move), surrounded by optimal solutions for size \(n{-}1\).
+\end{enumerate}
+
+\subsubsection{Questions}
+Why does the recursive algorithm for the Towers of Hanoi always produce the minimum possible number of moves, and how does seeing the full execution trace help you understand why no shorter solution could exist?
 
 \section{Essay}
 
