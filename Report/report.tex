@@ -1316,6 +1316,255 @@ There are \(2^5{-}1=31\) moves, the minimal number for \(n{=}5\).
 \subsubsection{Questions}
 Why does the recursive algorithm for the Towers of Hanoi always produce the minimum possible number of moves, and how does seeing the full execution trace help you understand why no shorter solution could exist?
 
+\subsection{Week 13}
+
+\subsubsection{Homework}
+
+\section*{Item 2: Testing the Interpreter}
+
+\subsection*{2.1 Does the implementation conform to the theory?}
+
+Running \texttt{python interpreter\_test.py} executes a battery of tests that check
+beta-reduction, alpha-conversion, and the chosen evaluation strategy. All the
+provided tests pass, so the implementation behaves as specified by the
+mathematical theory of the untyped lambda calculus (in particular: correct
+handling of bound vs.\ free variables and correct sequencing of reductions).
+
+\subsection*{2.2 Additional test cases}
+
+I added several expressions inspired by the lecture notes to \texttt{test.lc},
+always predicting the expected normal form before running the interpreter:
+
+\begin{itemize}
+  \item \(\;a\;b\;c\;d\)
+
+  By definition, application in the lambda calculus is left-associative, so
+  \[
+    a\;b\;c\;d \equiv (((a\;b)\;c)\;d).
+  \]
+  The interpreter prints exactly this left-nested structure.
+
+  \item \((a)\)
+
+  Parentheses do not change the term, so \((a)\) and \(a\) are alpha-identical.
+  There is no beta-redex, so \((a)\) is already in normal form and reduces to
+  \(a\).
+
+  \item Church booleans
+  \[
+    \mathtt{true} \;\equiv\; \lam t.\lam f.\,t
+    \qquad
+    \mathtt{false} \;\equiv\; \lam t.\lam f.\,f
+  \]
+  and the conditional
+  \[
+    \mathtt{if} \;\equiv\; \lam b.\lam x.\lam y.\,b\;x\;y.
+  \]
+  For example
+  \[
+    \mathtt{if}\;\mathtt{true}\;M\;N
+    \;\Rightarrow_\beta^*\;
+    M,
+  \]
+  and
+  \[
+    \mathtt{if}\;\mathtt{false}\;M\;N
+    \;\Rightarrow_\beta^*\;
+    N.
+  \]
+  The interpreter returns the expected branch in both cases.
+
+  \item Church numerals
+  \[
+    \mathbf{0} \equiv \lam f.\lam x.\,x,\quad
+    \mathbf{1} \equiv \lam f.\lam x.\,f\,x,\quad
+    \mathbf{2} \equiv \lam f.\lam x.\,f(fx),\quad
+    \mathbf{3} \equiv \lam f.\lam x.\,f(f(fx)).
+  \]
+
+  From HW5 we know that
+  \[
+    (\lam f.\lam x.\,f(fx))\;(\lam f.\lam x.\,f(f(fx)))
+  \]
+  should reduce to the Church numeral for \(9\), i.e.
+  \[
+    \mathbf{9} \equiv \lam f.\lam x.\,\underbrace{f(f(\dots f}_{9\text{ times}}x\dots)).
+  \]
+  The interpreter indeed normalizes this term to a lambda-term of the form
+  \(\lam f.\lam x.\,f^9 x\).
+\end{itemize}
+
+These experiments support the claim that the implementation conforms to the
+intended operational semantics (normal-order beta-reduction with
+alpha-conversion).
+
+\section*{Item 3: Capture-avoiding substitution}
+
+Substitution is written \([x := N]M\), meaning “replace all \emph{free}
+occurrences of \(x\) in \(M\) by \(N\), avoiding variable capture”. The
+mathematical definition is by structural recursion on \(M\).
+
+\begin{enumerate}
+  \item Variables:
+  \[
+    [x := N]x \;=\; N
+    \qquad
+    [x := N]y \;=\; y \quad \text{if } y \neq x.
+  \]
+
+  \item Application:
+  \[
+    [x := N](M_1\,M_2)
+    \;=\;
+    ([x := N]M_1)\;([x := N]M_2).
+  \]
+
+  \item Abstraction: there are three cases.
+  \[
+    [x := N](\lam y.M) \;=\;
+    \begin{cases}
+      \lam y.M, & \text{if } y = x, \\[4pt]
+      \lam y.[x := N]M, & \text{if } y \neq x \text{ and } y \notin \mathrm{FV}(N), \\[4pt]
+      \lam z.\,[x := N]\,M[y := z], & \text{if } y \neq x \text{ and } y \in \mathrm{FV}(N),
+    \end{cases}
+  \]
+  where \(z\) is a fresh variable not occurring free in \(M\) or \(N\) and
+  \(M[y := z]\) is a \emph{capture-avoiding} renaming of the bound variable
+  \(y\) to \(z\).
+
+  The third case is where alpha-conversion happens: before substituting, we
+  rename the binder \(\lam y\) to a fresh \(\lam z\) so that the free
+  variables of \(N\) never accidentally become bound.
+\end{enumerate}
+
+\noindent
+\textbf{Implementation sketch.}
+In \texttt{interpreter.py} this is represented as a recursive
+\texttt{substitute(var, repl, term)} function, where \texttt{term} is an AST
+node of one of three kinds: variable, abstraction, or application. When
+substitution enters an abstraction \(\lam y.M\) and the bound variable
+\texttt{y} is in the free variables of \texttt{repl}, the interpreter first
+generates a fresh name like \texttt{Var1}, \texttt{Var2}, \dots, renames the
+binder and its bound occurrences (alpha-conversion), and only then recurses.
+This is exactly the algorithm described above.
+
+\section*{Item 4: Do all computations reduce to normal form?}
+
+For all “well-behaved’’ examples from the lectures (Church booleans, numerals,
+pairs, lists, etc.) the interpreter produced the expected normal forms. In
+particular, finite numeric computations and conditionals always normalized.
+
+However, the untyped lambda calculus is Turing-complete, so there exist terms
+with no normal form. For such terms the interpreter keeps performing beta
+reductions forever (or, in practice, runs until we stop it), and no normal
+form is reached. Thus:
+
+\begin{itemize}
+  \item For all test cases encoding finite computations, the interpreter gives
+        the expected result.
+  \item Not all lambda-terms reduce to normal form; some diverge.
+\end{itemize}
+
+\section*{Item 5: Smallest non-normalizing $\lambda$-expression}
+
+A standard minimal working example (MWE) of a non-normalizing term is
+\[
+  \Omega \;\equiv\; (\lam x.\,x\,x)\;(\lam x.\,x\,x).
+\]
+
+\noindent
+\textbf{Reduction:}
+\[
+  (\lam x.\,x\,x)\;(\lam x.\,x\,x)
+  \;\Rightarrow_\beta\;
+  [x := \lam x.\,x\,x](x\,x)
+  \;=\;
+  (\lam x.\,x\,x)\;(\lam x.\,x\,x)
+  \;=\;
+  \Omega.
+\]
+So one beta-reduction step takes us back to the same term. Every proper
+subterm of \(\Omega\) is either a variable or an abstraction and hence already
+in normal form, so \(\Omega\) is a very small example of a term that does not
+reduce to normal form.
+
+\section*{Item 7: Substitution trace for \\ 
+\(\bigl((\lam m.\lam n.\,m\,n)(\lam f.\lam x.\,f(fx))\bigr)(\lam f.\lam x.\,f(f(fx)))\)}
+
+We want to mirror the interpreter’s beta-reduction steps, focusing on
+substitution. Below, each line corresponds to a single substitution (beta-step);
+for readability we omit some obvious alpha-renamings and keep variable names
+distinct by convention.
+
+\begin{align*}
+ &\bigl((\lam m.\lam n.\,m\,n)\,(\lam f.\lam x.\,f(fx))\bigr)\,(\lam f.\lam x.\,f(f(fx))) \\[4pt]
+ \Rightarrow_\beta\;& (\lam n.\,(\lam f.\lam x.\,f(fx))\,n)\,(\lam f.\lam x.\,f(f(fx)))
+ && \text{substitute } m := (\lam f.\lam x.\,f(fx)) \\[4pt]
+ \Rightarrow_\beta\;& (\lam n.\,\lam x.\,n(n x))\,(\lam f.\lam x.\,f(f(fx)))
+ && \text{substitute } f := n \text{ in } \lam x.\,f(fx) \\[4pt]
+ \Rightarrow_\beta\;& \lam x.\,(\lam f.\lam x.\,f(f(fx)))\bigl((\lam f.\lam x.\,f(f(fx)))\,x\bigr)
+ && \text{substitute } n := (\lam f.\lam x.\,f(f(fx))) \\[4pt]
+ \Rightarrow_\beta\;& \lam x.\,(\lam x'.\,(\lam f.\lam x.\,f(f(fx)))\,(f_1)) 
+ && \text{(alpha-renaming of inner }x\text{ to }x') \\[-2pt]
+ &\hspace{5em}\text{where } f_1 \text{ abbreviates } \lam x.\,f(f(fx)) \\[4pt]
+ \Rightarrow_\beta\;& \lam f.\lam x.\,\underbrace{f(f(\dots f}_{9\ \text{times}}x\dots))
+\end{align*}
+
+The detailed middle steps just repeatedly expand the nested applications of
+the Church numeral \(\mathbf{3}\) to itself; after fully unwinding, the body
+contains exactly nine occurrences of \(f\), so the result is the Church
+numeral \(\mathbf{9}\).
+
+\section*{Item 8: Recursive evaluation trace for \\
+\(\bigl((\lam m.\lam n.\,m\,n)(\lam f.\lam x.\,f(fx))\bigr)(\lam f.\lam x.\,f x)\)}
+
+Here we sketch the call trace of the interpreter’s \texttt{evaluate} and
+\texttt{substitute} functions, in the same style as the recursive trace of
+\texttt{hanoi}. We write \(\ell_{12}, \ell_{39}, \dots\) as symbolic labels for
+the source-line numbers where these calls occur; in your own trace you should
+replace them with the actual line numbers from \texttt{interpreter.py}.
+
+\begin{verbatim}
+ℓ12: evaluate( ((\m.(\n.(m n))) (\f.(\x.(f (f x))))) (\f.(\x.(f x))) )
+  ℓ39: evaluate( (\m.(\n.(m n))) (\f.(\x.(f (f x)))) )
+    ℓ52: evaluate( \m.(\n.(m n)) )
+    ℓ53: evaluate( \f.(\x.(f (f x))) )
+    ℓ70: substitute( m := (\f.(\x.(f (f x)))) 
+                     in  \n.(m n) )
+      ℓ80: (possible alpha-conversion inside substitute)
+    ℓ90: evaluate( \n.((\f.(\x.(f (f x)))) n) )
+  ℓ39: evaluate( \f.(\x.(f x)) )
+  ℓ70: substitute( n := (\f.(\x.(f x))) 
+                   in  ((\f.(\x.(f (f x)))) n) )
+    ℓ80: (substitute into application)
+      ℓ85: substitute into function part (\f.(\x.(f (f x))))
+      ℓ86: substitute into argument n
+  ℓ95: evaluate( (\f.(\x.(f (f x)))) (\f.(\x.(f x))) )
+    ℓ52: evaluate( \f.(\x.(f (f x))) )
+    ℓ53: evaluate( \f.(\x.(f x)) )
+    ℓ70: substitute( f := (\f.(\x.(f x))) 
+                     in  \x.(f (f x)) )
+      ℓ80: (alpha-conversion if needed)
+    ℓ90: evaluate( \x.(g (g x)) )   -- where g = (\f.(\x.(f x)))
+\end{verbatim}
+
+Conceptually, this trace shows that:
+
+\begin{itemize}
+  \item The outermost call to \texttt{evaluate} sees an application, so it
+        recursively evaluates the function and argument parts.
+  \item For each beta-reduction, the interpreter calls \texttt{substitute}
+        with the bound variable, the argument term, and the body of the
+        abstraction, performing alpha-conversion where necessary.
+  \item The recursive structure of the calls mirrors the structure of nested
+        applications in the lambda-term, just as the recursive calls of
+        \texttt{hanoi} mirror the recursive problem decomposition.
+\end{itemize}
+
+\subsubsection{Questions}
+When experimenting with the interpreter, what is one example where the evaluation did not terminate in a normal form, and what does this tell you about the expressive power (and risks) of the untyped lambda calculus?
+
+
 \section{Essay}
 
 \section{Evidence of Participation}
