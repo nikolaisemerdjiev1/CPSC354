@@ -1567,12 +1567,148 @@ When experimenting with the interpreter, what is one example where the evaluatio
 
 \section{Essay}
 
+A unifying theme of this course is that \emph{programming languages are
+mathematical objects}. From the MIU puzzle and abstract reduction systems
+(ARSs), through measure functions and termination proofs, to the lambda
+calculus, interpreters, and Lean, we repeatedly saw that programs can be
+understood as symbolic structures governed by precise rules of
+transformation. In this essay I focus on the lambda calculus and
+operational semantics as a way to synthesize the material and to connect
+it to the broader practice of software engineering.
+
+The untyped lambda calculus, introduced by Church in the 1930s, is a tiny
+language with just variables, function abstraction, and application, yet
+it is computationally universal. It also forms the conceptual foundation
+of modern functional languages such as Haskell and ML.\cite{mukund-lambda}
+In the homework and the interpreter project, I experienced this directly:
+Church numerals turned numbers into “iterate this function $n$ times,” and
+boolean values became higher-order functions selecting a branch. What
+initially looks like a curiosity of logic turns out to be a powerful way
+to think about data and control flow in real languages.
+
+Abstract reduction systems and the lambda calculus meet again in the idea
+of \emph{operational semantics}. A small-step semantics defines a reduction
+relation $e \to e'$ describing how a program takes one tiny computational
+step at a time, while a big-step semantics relates an expression directly
+to its final value.\cite{ray-opsem} In the course, this showed up in two
+places: (1) drawing ARS graphs and proving properties such as confluence
+and unique normal forms; and (2) implementing an evaluator that repeatedly
+applies beta-reduction and capture-avoiding substitution. Seeing the same
+ideas in both a pen-and-paper proof style and in Python code made it clear
+that an interpreter is just “the semantics made executable.”
+
+This perspective matters for software engineering. Real-world languages
+are far more complex than the toy calculi in class, but they are still
+ultimately defined by some kind of operational semantics. When we worry
+about whether an optimization preserves behaviour, whether a refactoring
+is semantics-preserving, or whether a compiler pass can introduce bugs,
+we are implicitly appealing to these formal models. Concepts like
+measure functions and termination arguments also scale up: they underlie
+loop variants, termination checkers, and tools that verify that recursive
+functions or protocols eventually make progress.
+
+Personally, the most interesting and useful part of the course was seeing
+the tight connection between proofs and programs. Proving termination of
+Euclid’s algorithm or merge sort using a measure, then later reasoning
+about non-terminating lambda terms such as $\Omega$, sharpened my
+intuition about when code is guaranteed to finish and when it might loop
+forever. Working in Lean made this even more concrete: logical rules,
+rewriting, and function definitions all became different faces of the
+same underlying notion of computation.
+
+If I had to suggest improvements, they would be minor: perhaps a few more
+worked examples that explicitly connect each new formal concept (like
+confluence or fixed points) to a concrete bug or design decision in a
+popular language or library. Overall, though, the course already does a
+good job of showing that programming-language theory is not just abstract
+math, but a practical toolkit for reasoning about software systems.
+
+
 \section{Evidence of Participation}
+
+\subsection{\textit{Machine Code Explained} (Computerphile)}
+
+\textbf{Summary.}
+In this video, Matt Godbolt explains what machine code really is and how it relates to the programs we write in high-level languages. He starts from the basic idea that a CPU ultimately only understands very small, fixed-size instructions encoded as binary numbers. Each instruction tells the processor to do something extremely simple, like move a value into a register, add two registers, or jump to another location in memory. Godbolt shows how these binary patterns are often written in hexadecimal for convenience, and how assembly language is just a human-readable layer on top of those numeric opcodes.
+
+He then illustrates how a tiny program is laid out in memory as a sequence of instructions, and how the CPU steps through them one by one using the program counter. Along the way, he connects this to compilers: when we compile C or another high-level language, the compiler’s job is to translate our source into this low-level instruction sequence. The video emphasizes that many “mysterious” behaviors, like crashes, performance quirks, or odd jumps, make more sense once you understand what the machine is actually executing and how tightly constrained machine instructions really are.
+
+\textbf{Discussion Question.}
+Once you understand that machine code is just a long sequence of simple instructions, how does that change the way you think about debugging or reasoning about the correctness of programs written in a high-level language?
+
+\noindent\textbf{Link:} \url{https://www.youtube.com/watch?v=8VsiYWW9r48}
+
+\subsection{\textit{Behind Mobile Game Design} (Olga Lazar)}
+
+\textbf{Summary.}
+In this talk, Olga Lazar shares her journey into mobile game design and offers a grounded look at what the day-to-day work of a game designer actually involves. She explains how designers sit at the intersection of art, programming, and business: they create core mechanics, tune difficulty and progression, and think constantly about player motivation and retention. Rather than just “coming up with ideas,” a lot of her work is iterative balancing, looking at player data, tweaking numbers, adjusting level layouts, and refining the feel of the game through repeated playtesting. She also emphasizes communication: designers have to translate high-level concepts into concrete specs that artists and engineers can implement, then negotiate trade-offs when technical or time constraints appear. Along the way, she talks about building a career in game design, including the importance of a portfolio, showing prototypes rather than just ideas, and being willing to start small (e.g., in QA or junior roles) and grow into more responsibility.
+
+\textbf{Discussion Question.}
+Game designers often balance “what would be fun” with “what will keep players engaged and paying over time.” When those two goals conflict, how should a designer decide which side to prioritize, and what ethical limits should they place on their own design choices?
+
+\noindent\textbf{Link:} \url{https://www.youtube.com/watch?v=VFkLXbSf7Co}
+
+\subsection{\textit{Creating Your Own Programming Language} (Computerphile)}
+
+\textbf{Summary.}
+In the Computerphile video “Creating Your Own Programming Language,” Dr.~Laurie Tratt demonstrates how surprisingly little code is required to build a tiny, working programming language. Instead of starting with heavy theory, he takes a practical, incremental approach: first choosing a minimal syntax (reverse Polish notation) to dodge complex parsing, then writing a small interpreter that uses a stack to evaluate expressions. From there, he gradually adds features, variables stored in a dictionary, basic control flow, and looping constructs, showing that core language ideas (state, branching, iteration) can emerge from a very compact design. Throughout, he emphasizes that languages are just programs like any other: they are made of concrete implementation choices and trade-offs, not magic. The video highlights how building a toy language helps deepen understanding of real-world languages, interpreters, and compilers by making the underlying mechanisms visible and manipulable.
+
+\textbf{Discussion Question.}
+When designing a small language for learning, is it better to keep the syntax and features extremely minimal, or to include a few “real-world” conveniences even if they complicate the implementation?
+
+\noindent\textbf{Link:} \url{https://www.youtube.com/watch?v=Q2UDHY5as90}
+
+\subsection{Untyped Lambda Calculus Introduction}
+
+\textbf{Summary.}
+In this video, the instructor introduces the untyped lambda calculus as a tiny but surprisingly powerful “language of only functions.” He starts by explaining the basic syntax (variables, function abstractions, and applications) and then walks through how computation happens via substitution and step-by-step reduction (beta-reduction). Along the way he emphasizes free vs.\ bound variables and why we sometimes need to rename bound variables (alpha-conversion) to avoid accidental capture when substituting. With that foundation in place, he shows how everyday programming concepts emerge from pure functions: booleans as functions that choose between two arguments, logical operators like AND/OR built from those booleans, and natural numbers as Church numerals that represent “apply this function $n$ times.”
+
+The video then builds up more complex behavior: arithmetic on Church numerals, conditionals, pairs, and finally recursion via a fixed-point combinator (a Y-combinator–style construction). By the end, you see how a language with no built-in numbers, booleans, loops, or variables in the usual sense can still express all the usual programming patterns. The instructor frequently connects these ideas back to functional programming, pointing out how modern languages (like Haskell and ML-style languages) are grounded in the same calculus. Overall, the video reinforces a major theme from the course: that programs can be modeled as mathematical objects and that “real” languages are elaborate skins over a small, well-defined core.
+
+\textbf{Discussion Question.}
+If the untyped lambda calculus can encode numbers, booleans, conditionals, and recursion using only functions, do you think that starting from such a tiny core makes it easier or harder to understand real-world programming languages later on?
+
+\noindent\textbf{Link:} \url{https://www.youtube.com/watch?v=v5FBAbnLjUQ}
+
+\subsection{\textit{Procedural Generation in Games}}
+
+\textbf{Summary.}
+In this video, Dr.~Mike Cook explains procedural generation in games, how simple rules and algorithms can automatically create huge, varied worlds and content instead of designers building everything by hand. He starts with the idea that procedural content is generated by code rather than directly authored, and shows how small rule sets can expand into large, rich spaces of possibilities. He discusses examples like terrain, levels, and items, and contrasts random generation with structured generation, where constraints, weights, and rules are used to keep results fun and playable instead of chaotic.
+
+Dr.~Cook also talks about trade-offs: procedural systems can save time and create endless variety, but they can also feel repetitive or meaningless if the underlying rules are too shallow. Good procedural design requires thinking about player experience, what patterns players will notice, how difficulty flows, and how to avoid impossible or boring configurations. In the end, procedural generation is presented less as “magic randomness” and more as a design tool: a way to encode decisions and aesthetics into algorithms that act like co-designers alongside humans.
+
+\textbf{Discussion Question.}
+If procedural generation is just “rules encoded as programs,” in what ways is designing a procedural generator similar to designing a programming language?
+
+\noindent\textbf{Link:} \url{https://www.youtube.com/watch?v=G6ZHUOSXZDo}
+
 
 \section{Conclusion}\label{conclusion}
 
+Stepping back from the technical details, this course has quietly reshaped how I think about software engineering as a whole. Most of my other classes focus on building systems in existing languages and tools; CPSC 354 zoomed out and asked a more fundamental question: what \emph{is} a programming language, really, and how do we know what our programs mean? From the MIU puzzle and abstract reduction systems, to lambda calculus, Church numerals, and the \texttt{fix} operator, the course consistently pushed me to see programs as mathematical objects that can be reasoned about in a precise way.
+
+In the wider world of software engineering, this shows up in several important ways. Termination proofs and measure functions are the theoretical side of something every engineer cares about: will this algorithm always finish, and why? Abstract rewriting systems look like toy examples, but they are the same ideas behind compiler optimizations and program transformations: do different rewrite paths produce the same result, or can they get “stuck” in different places? Building and testing the lambda-calculus interpreter connected directly to language implementation and runtime systems. Writing grammars, designing precedence rules, and debugging ambiguous parses is exactly what real language designers and tool builders deal with when they design new syntaxes or write parsers and linters.
+
+What I found most interesting and useful was the combination of \emph{formal} reasoning and \emph{concrete} artifacts. On the one hand, we used Lean to prove small arithmetic and logical facts step by step, seeing how much of “obvious” math actually rests on tiny lemmas like \texttt{add\_zero} and \texttt{add\_succ}. On the other hand, we wrote actual code: an interpreter, tests with \texttt{testing4b.py}, grammar files, and example programs like factorial, Fibonacci, and list-processing with \texttt{hd}/\texttt{tl}. That back-and-forth between proofs and running programs made the material feel less like pure theory and more like a toolkit I can bring into future work: thinking carefully about substitution and variable capture, structuring semantics, and designing tests that reflect the underlying math.
+
+In terms of improvements, I do not have major complaints; the course worked well for me overall. If anything, a small enhancement would be to include a few more explicit “bridges” to mainstream languages and tools (for example, side-by-side comparisons with features in Python, Java, etc), just to help connect the abstract ideas even more directly to the languages most of us use day to day.
+
 \begin{thebibliography}{99}
-\bibitem[BLA]{bla} Author, \href{https://en.wikipedia.org/wiki/LaTeX}{Title}, Publisher, Year.
+
+\bibitem{mukund-lambda}
+M.~Mukund,
+\emph{The (untyped) lambda calculus},
+lecture notes, Chennai Mathematical Institute.
+Available at \url{https://www.cmi.ac.in/~madhavan/courses/pl2009/lecturenotes/lecture-notes/node81.html}
+(accessed December 4, 2025).
+
+\bibitem{ray-opsem}
+J.~Ray,
+\emph{Operational Semantics},
+Loyola Marymount University.
+Available at \url{https://cs.lmu.edu/~ray/notes/opsem/}
+(accessed December 4, 2025).
+
 \end{thebibliography}
 
 \end{document}
